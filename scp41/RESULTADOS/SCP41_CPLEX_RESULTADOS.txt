@@ -1,0 +1,62 @@
+============================================
+ Set Cover Problem — CPLEX Solver
+ Instancia: scp41.txt
+============================================
+
+Elementos (m) : 200
+Conjuntos (n) : 1000
+
+Iniciando otimizacao...
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_Simplex_Display                         0
+CPXPARAM_TimeLimit                               3600
+Found incumbent of value 50050.000000 after 0.01 sec. (0.05 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 0 rows and 61 columns.
+Reduced MIP has 200 rows, 939 columns, and 3928 nonzeros.
+Reduced MIP has 939 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (2.03 ticks)
+Probing time = 0.00 sec. (0.12 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 200 rows, 939 columns, and 3928 nonzeros.
+Reduced MIP has 939 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (1.80 ticks)
+Probing time = 0.00 sec. (0.12 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 8 threads.
+Root relaxation solution time = 0.02 sec. (1.20 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                        46620.0000        0.0000           100.00%
+*     0+    0                          437.0000        0.0000           100.00%
+*     0     0      integral     0      429.0000      429.0000      141    0.00%
+Elapsed time = 0.07 sec. (6.95 ticks, tree = 0.00 MB, solutions = 3)
+
+Root node processing (before b&c):
+  Real time             =    0.07 sec. (7.00 ticks)
+Parallel b&c, 8 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    0.07 sec. (7.00 ticks)
+
+============================================
+ RESULTADOS
+============================================
+Status CPLEX  : Optimal
+Tempo (s)     : 0.075678
+Valor obj.    : 429
+Melhor bound  : 429
+MIP gap (%)   : 0
+Conjuntos sel.: 66
+
+Conjuntos selecionados (1-based):
+1 2 3 5 6 8 9 10 11 12 13 14 15 16 17 18 20 21 22 23 25 26 28 29 43 44 46 47 48 49 50 52 54 58 59 63 66 69 70 71 75 77 78 81 83 85 86 89 91 94 103 107 110 116 120 121 122 124 138 143 144 146 153 194 275 433 
+
+Solucao valida: SIM

@@ -1,0 +1,65 @@
+RESULTADOS DLX SET COVER
+
+
+Linhas escolhidas: L1 L4 
+ 
+Estatisticas:
+  Nos explorados : 3
+  Podas          : 0
+set_cover_exemplo1.txt
+ 
++-------------------------------------------------+
+|            RESUMO DE TEMPO (CPLEX-style)        |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :     0.0001 s |
+| Tempo de CPU   (CPU time)      :     0.0001 s |
++-------------------------------------------------+
+
+
+
+
+
+Resultado final:
+Custo minimo: 2
+Linhas escolhidas: L1 L5 
+
+Estatisticas:
+  Nos explorados : 7
+  Podas          : 4
+set_cover_exemplo2.txt
+
++-------------------------------------------------+
+|            RESUMO DE TEMPO (CPLEX-style)        |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :     0.0002 s |
+| Tempo de CPU   (CPU time)      :     0.0002 s |
++-------------------------------------------------+
+
+
+
+
+Resultado final:
+Custo minimo: 2
+Linhas escolhidas: L3 L2 
+
+Estatisticas:
+  Nos explorados : 4
+  Podas          : 3
+set_cover_exemplo3.txt
+
++-------------------------------------------------+
+|            RESUMO DE TEMPO (CPLEX-style)        |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :     0.0001 s |
+| Tempo de CPU   (CPU time)      :     0.0001 s |
++-------------------------------------------------+
+
+
+
+
+
+
+
+
+
+
