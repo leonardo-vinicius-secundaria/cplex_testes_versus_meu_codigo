@@ -44,5 +44,5 @@ O foco do  agora é a otimização do DLX. Para que o algoritmo consiga resolver
 ## 📚 Referências
 * **Donald Knuth** — *Dancing Links* (Millennial Fashions).
 * **Algorithm X**: O algoritmo de backtracking de Knuth.
-* **OR-Library**: Repositório de instâncias para problemas de pesquisa operacional.
+* **[OR-Library](https://people.brunel.ac.uk/~mastjjb/jeb/orlib/scpinfo.html)**: Repositório de instâncias para problemas de pesquisa operacional.
 * **IBM ILOG CPLEX Optimization Studio**.
