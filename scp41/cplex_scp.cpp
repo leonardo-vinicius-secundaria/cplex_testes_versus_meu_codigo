@@ -88,7 +88,9 @@ int main(int argc, char* argv[]) {
 
     // ── Arquivo de entrada ─────────────────────────────────
     std::string filename = "scp41.txt";
+    double timeLimit = 3600.0;
     if (argc >= 2) filename = argv[1];
+    if (argc >= 3) timeLimit = std::stod(argv[2]);
 
     std::cout << "============================================\n";
     std::cout << " Set Cover Problem — CPLEX Solver\n";
@@ -149,8 +151,8 @@ int main(int argc, char* argv[]) {
         // Tolerâncias padrão (MIP gap relativo de 0,01 %)
         cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 1e-4);
 
-        // Limite de tempo (segundos) — ajuste conforme necessário
-        cplex.setParam(IloCplex::Param::TimeLimit, 3600.0);
+        // Limite de tempo (segundos) — configurável via argv[2]
+        cplex.setParam(IloCplex::Param::TimeLimit, timeLimit);
 
         // Threads — usa todos os disponíveis (0 = automático)
         cplex.setParam(IloCplex::Param::Threads, 0);

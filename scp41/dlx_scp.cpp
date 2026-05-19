@@ -66,8 +66,8 @@ const int    MAXNODE       = 200000;
 const int    MAXCOL        = 5001;   // elementos (4000 + folga)
 const int    MAXROW        = 5001;   // conjuntos (4000 + folga)
 const int    MAXSOL        = 1000;
-const double TIME_LIMIT_SEC = 3600.0;
-const long long LOG_EVERY  = 1000000LL;
+double       TIME_LIMIT_SEC = 3600.0; // configurável via argumento
+const long long LOG_EVERY  = 100000LL;
 
 // ============================================================
 //  ESTRUTURA DLX
@@ -97,6 +97,13 @@ long long totalPodas  = 0;
 bool      stopSearch  = false;
 bool      provedOptimal = false;
 
+// referencias globais para 2-opt no incumbent (set by main before search)
+struct Instance;
+const struct Instance*    g_inst  = nullptr;
+const vector<bool>*       g_alive = nullptr;
+typedef int (*FuncLS2)(const Instance&, const vector<bool>&, vector<int>&);
+FuncLS2                   g_localSearch2opt = nullptr;
+
 // ============================================================
 //  LB LAGRANGIANO  (mantido incrementalmente)
 //
@@ -109,7 +116,12 @@ double lbActiveSum = 0.0;
 double rootLB      = 0.0;
 
 // ============================================================
-//  PROGRESSO
+//  PROGRESSO + checagem de TIME_LIMIT
+//
+//  A cada LOG_EVERY nós, imprime status e — se o tempo de parede
+//  ultrapassou TIME_LIMIT_SEC — sinaliza parada da busca. O B&B
+//  retorna então a melhor solução conhecida (UB do warm-start ou
+//  do incumbente atual). Não é ótimo provado, mas é factível.
 // ============================================================
 inline void checkProgress()
 {
@@ -123,6 +135,13 @@ inline void checkProgress()
              << " | wall=" << tw << "s\n"
              << defaultfloat;
         cout.flush();
+
+        if (tw >= TIME_LIMIT_SEC)
+        {
+            cout << "[STOP] Limite de tempo (" << TIME_LIMIT_SEC
+                 << "s) atingido. Retornando melhor solucao conhecida.\n";
+            stopSearch = true;
+        }
     }
 }
 
@@ -203,10 +222,15 @@ inline bool colunaAtiva(int c) { return colAtiva[c]; }
 int chooseColumn()
 {
     int    best      = -1;
-    double bestScore = 1e18;
+    double bestScore = -1e18;
 
+    // Heurística híbrida:
+    //   primário:   u_star[c]   (coluna que mais contribui ao LB)
+    //   secundário: colSize[c]  (menor = menos opções no branching)
+    //   terciário:  inversa do mínimo custo das linhas que cobrem c
     for (int c = rightN[header]; c != header; c = rightN[c])
     {
+        // calcula min_rowcost só se necessário (caro)
         int minCost = INT_MAX;
         for (int r = downN[c]; r != c; r = downN[r])
         {
@@ -214,8 +238,13 @@ int chooseColumn()
             if (usedInBranch[row]) continue;
             if (rowCost[row] < minCost) minCost = rowCost[row];
         }
-        double score = (double)minCost * 1000.0 + colSize[c];
-        if (score < bestScore) { bestScore = score; best = c; }
+        if (minCost == INT_MAX) minCost = 1;
+
+        // u_star tem peso forte, mas combinado com tamanho e custo mínimo:
+        double score = u_star[c] * 1e6
+                       - colSize[c] * 100.0
+                       + (double)minCost / 1000.0;
+        if (score > bestScore) { bestScore = score; best = c; }
     }
     return best;
 }
@@ -246,6 +275,21 @@ void search(int k, int MAX_K, int custoAtual)
         bestSolSize = solSize;
         for (int i = 0; i < solSize; i++)
             bestSol[i] = rowID[solution[i]];
+
+        // Tenta melhorar via 2-opt antes de imprimir incumbent
+        if (g_inst && g_alive && g_localSearch2opt)
+        {
+            vector<int> tmpSol(bestSol, bestSol + bestSolSize);
+            int newCost = g_localSearch2opt(*g_inst, *g_alive, tmpSol);
+            if (newCost < bestCost)
+            {
+                bestCost    = newCost;
+                bestSolSize = (int)tmpSol.size();
+                for (int i = 0; i < bestSolSize; i++)
+                    bestSol[i] = tmpSol[i];
+            }
+        }
+
         printMelhorSolucao();
 
         // Fathom by bound: se atingimos o LB Lagrangiano global,
@@ -270,18 +314,11 @@ void search(int k, int MAX_K, int custoAtual)
     colSize[c]--;
 
     // ---- ORDENA LINHAS CANDIDATAS -------------------------
-    // Estáticos por nível de recursão? Não — cada chamada precisa
-    // do seu próprio buffer pois recurso ANTES de terminar a iteração
-    // sobre candidatos. Então mantemos no stack frame, mas alocados
-    // como std::vector<> para ir no heap (evita stack overflow com
-    // MAXROW grande e profundidade alta).
-    static thread_local vector<pair<double,int>> candStorage;
-    static thread_local vector<int> cobStorage;
-    // Um buffer por nível de profundidade
-    if ((int)candStorage.size() < (k + 1) * MAXROW) candStorage.resize((k + 1) * MAXROW);
-    if ((int)cobStorage.size()  < (k + 1) * MAXCOL) cobStorage.resize((k + 1) * MAXCOL);
-    pair<double,int>* candidatos = candStorage.data() + k * MAXROW;
-    int numCandidatos = 0;
+    // Buffers locais (heap) — std::vector evita estouro de pilha
+    // em recursões profundas e elimina problema de realocação
+    // (ponteiros invalidados após search recursivo).
+    vector<pair<double,int>> candidatos;
+    candidatos.reserve(64);
 
     for (int r = downN[c]; r != c; r = downN[r])
     {
@@ -293,13 +330,13 @@ void search(int k, int MAX_K, int custoAtual)
             if (colunaAtiva(colID[j])) novasCoberturas++;
 
         double score = (double)rowCost[row] / novasCoberturas;
-        candidatos[numCandidatos++] = {score, r};
+        candidatos.push_back({score, r});
     }
 
-    sort(candidatos, candidatos + numCandidatos);
+    sort(candidatos.begin(), candidatos.end());
 
     // ---- EXPLORA ------------------------------------------
-    for (int ci = 0; ci < numCandidatos; ci++)
+    for (size_t ci = 0; ci < candidatos.size(); ci++)
     {
         if (stopSearch) break;
 
@@ -312,8 +349,9 @@ void search(int k, int MAX_K, int custoAtual)
         usedInBranch[row]   = true;
         solution[solSize++] = r;
 
-        int* cobertas = cobStorage.data() + k * MAXCOL;
-        int numCobertas = 0;
+        // Lista de colunas cobertas por esta linha — local ao escopo
+        vector<int> cobertas;
+        cobertas.reserve(64);
 
         for (int j = rightN[r]; j != r; j = rightN[j])
         {
@@ -321,12 +359,12 @@ void search(int k, int MAX_K, int custoAtual)
             if (!colunaAtiva(col)) continue;
             colSize[col]--;
             cover(col);
-            cobertas[numCobertas++] = col;
+            cobertas.push_back(col);
         }
 
         search(k + 1, MAX_K, novoCusto);
 
-        for (int i = numCobertas - 1; i >= 0; i--)
+        for (int i = (int)cobertas.size() - 1; i >= 0; i--)
         {
             uncover(cobertas[i]);
             colSize[cobertas[i]]++;
@@ -613,6 +651,282 @@ int removeRedundant(const Instance& inst, vector<int>& sol)
 }
 
 // ============================================================
+//  greedyChvatalRandom — greedy de Chvátal com tie-break aleatório
+//
+//  Útil para iterated greedy (multi-start). Quando há vários
+//  conjuntos com o mesmo score (cost / cidades_novas), escolhe
+//  um aleatoriamente em vez do menor índice. Em instâncias com
+//  custos pequenos (scpe*, scp6*) o tie-break é decisivo para
+//  achar o ótimo.
+// ============================================================
+int greedyChvatalRandom(const Instance& inst,
+                        const vector<bool>& alive,
+                        vector<int>& chosen,
+                        mt19937& rng)
+{
+    int m = inst.m;
+    int n = inst.n;
+
+    vector<bool> covered(m + 1, false);
+    int nCov = 0, totalCost = 0;
+    chosen.clear();
+
+    vector<int> remaining(n + 1, 0);
+    for (int j = 1; j <= n; j++)
+        if (alive[j]) remaining[j] = (int)inst.coverElems[j].size();
+
+    vector<int> bestCands;
+    bestCands.reserve(64);
+
+    while (nCov < m)
+    {
+        double best  = 1e18;
+        bestCands.clear();
+
+        for (int j = 1; j <= n; j++)
+        {
+            if (!alive[j] || remaining[j] == 0) continue;
+            double sc = (double)inst.cost[j] / remaining[j];
+            if (sc < best - 1e-12) { best = sc; bestCands.clear(); bestCands.push_back(j); }
+            else if (sc < best + 1e-12) bestCands.push_back(j);
+        }
+
+        if (bestCands.empty()) return INT_MAX;
+        int bestJ = bestCands[uniform_int_distribution<int>(0, (int)bestCands.size()-1)(rng)];
+
+        chosen.push_back(bestJ);
+        totalCost += inst.cost[bestJ];
+
+        for (int e : inst.coverElems[bestJ])
+        {
+            if (covered[e]) continue;
+            covered[e] = true;
+            nCov++;
+            for (int j0 : inst.elemSets[e - 1])
+                if (alive[j0 + 1] && remaining[j0 + 1] > 0)
+                    remaining[j0 + 1]--;
+        }
+    }
+    return totalCost;
+}
+
+// ============================================================
+//  iteratedGreedy — executa greedy várias vezes com seeds
+//  diferentes e devolve a melhor solução encontrada (após
+//  remover redundantes).
+//
+//  Inclui também "destruction-construction" (Ruin-and-Recreate):
+//  remove K conjuntos aleatórios da melhor solução e refaz o
+//  resto via greedy. Isso explora vizinhanças mais distantes
+//  que o 2-opt local search.
+// ============================================================
+int localSearch2opt(const Instance&, const vector<bool>&, vector<int>&); // fwd
+int iteratedGreedy(const Instance& inst,
+                   const vector<bool>& alive,
+                   const double* u,
+                   int nIters,
+                   vector<int>& bestSolOut)
+{
+    mt19937 rng(42);
+    int bestC = INT_MAX;
+    bestSolOut.clear();
+
+    auto tryCand = [&](vector<int>& sol)
+    {
+        if (sol.empty()) return;
+        int c = removeRedundant(inst, sol);
+        // local search 2-opt em cada candidata — barato e eficaz
+        if ((int)sol.size() <= 80) c = localSearch2opt(inst, alive, sol);
+        if (c < bestC) { bestC = c; bestSolOut = sol; }
+    };
+
+    // 1ª: greedy clássico determinístico
+    {
+        vector<int> sol;
+        if (greedyChvatal(inst, alive, sol) != INT_MAX) tryCand(sol);
+    }
+
+    // 2ª: greedy guiado por reduced cost
+    if (u != nullptr)
+    {
+        vector<int> sol;
+        if (greedyByReducedCost(inst, alive, u, sol) != INT_MAX) tryCand(sol);
+    }
+
+    // 3ª–N: greedy com tie-break aleatório
+    for (int it = 0; it < nIters; it++)
+    {
+        vector<int> sol;
+        if (greedyChvatalRandom(inst, alive, sol, rng) != INT_MAX) tryCand(sol);
+    }
+
+    // Ruin-and-recreate: a partir da melhor, remove K conjuntos
+    // aleatórios e refaz o resto via greedy guiado por reduced cost.
+    if (!bestSolOut.empty() && u != nullptr)
+    {
+        int n = inst.n;
+        int m = inst.m;
+
+        for (int rep = 0; rep < 50; rep++)
+        {
+            int K = 3 + (int)(uniform_int_distribution<int>(0, 7)(rng));
+            if (K > (int)bestSolOut.size()) K = (int)bestSolOut.size();
+
+            // copia e remove K aleatorios
+            vector<int> base = bestSolOut;
+            shuffle(base.begin(), base.end(), rng);
+            base.resize((int)base.size() - K);
+
+            // marca cobertura atual
+            vector<int> cov(m + 1, 0);
+            for (int j : base)
+                for (int e : inst.coverElems[j]) cov[e]++;
+
+            // greedy para cobrir o restante usando reduced cost
+            vector<int> remaining(n + 1, 0);
+            for (int j = 1; j <= n; j++)
+                if (alive[j]) {
+                    int c = 0;
+                    for (int e : inst.coverElems[j])
+                        if (cov[e] == 0) c++;
+                    remaining[j] = c;
+                }
+
+            int nUncov = 0;
+            for (int e = 1; e <= m; e++) if (cov[e] == 0) nUncov++;
+
+            bool ok = true;
+            while (nUncov > 0)
+            {
+                int    bestJ = -1;
+                double best  = 1e18;
+                for (int j = 1; j <= n; j++)
+                {
+                    if (!alive[j] || remaining[j] == 0) continue;
+                    double rc = inst.cost[j];
+                    for (int e : inst.coverElems[j]) rc -= u[e];
+                    double effCost = max(1.0, rc + (double)inst.cost[j] * 0.001);
+                    double sc = effCost / remaining[j];
+                    if (sc < best) { best = sc; bestJ = j; }
+                }
+                if (bestJ == -1) { ok = false; break; }
+                base.push_back(bestJ);
+                for (int e : inst.coverElems[bestJ])
+                {
+                    if (cov[e]++ == 0) {
+                        nUncov--;
+                        for (int j0 : inst.elemSets[e - 1])
+                            if (alive[j0 + 1] && remaining[j0 + 1] > 0)
+                                remaining[j0 + 1]--;
+                    }
+                }
+            }
+            if (ok) tryCand(base);
+        }
+    }
+
+    return bestC;
+}
+
+// ============================================================
+//  localSearch2opt — busca local "1-flip swap"
+//
+//  Para cada conjunto j na solução, tenta substitui-lo por um
+//  conjunto k tal que (sol \ {j}) ∪ {k} ainda cobre tudo e
+//  cost[k] < cost[j]. Se não, tenta retirar j e cobrir os
+//  elementos não-cobertos com 1 conjunto extra mais barato.
+//
+//  Itera até não haver melhora. O(|sol| * n * m) por iter.
+// ============================================================
+int localSearch2opt(const Instance& inst,
+                    const vector<bool>& alive,
+                    vector<int>& sol)
+{
+    int m = inst.m;
+    int n = inst.n;
+
+    bool improved = true;
+    int  iters = 0;
+
+    while (improved && iters < 50)
+    {
+        improved = false;
+        iters++;
+
+        // contagem de cobertura atual
+        vector<int> cov(m + 1, 0);
+        for (int j : sol)
+            for (int e : inst.coverElems[j]) cov[e]++;
+
+        // tenta substituir cada j por k mais barato
+        for (size_t pos = 0; pos < sol.size(); pos++)
+        {
+            int j = sol[pos];
+            int costJ = inst.cost[j];
+
+            // remove j: contagens caem
+            for (int e : inst.coverElems[j]) cov[e]--;
+
+            // elementos descobertos por remover j
+            vector<int> uncov;
+            uncov.reserve(16);
+            for (int e : inst.coverElems[j])
+                if (cov[e] == 0) uncov.push_back(e);
+
+            // procura k != j alive que cubra TODOS os uncov
+            // e tenha custo < costJ
+            int bestK = -1;
+            int bestKcost = costJ;
+            for (int k = 1; k <= n; k++)
+            {
+                if (k == j || !alive[k]) continue;
+                if (inst.cost[k] >= bestKcost) continue;
+
+                // verifica se cobre todos uncov
+                bool okk = true;
+                for (int e : uncov)
+                {
+                    auto& ce = inst.coverElems[k];
+                    if (!binary_search(ce.begin(), ce.end(), e)) { okk = false; break; }
+                }
+                if (!okk) continue;
+
+                // checa que k nao está em sol
+                bool kInSol = false;
+                for (int s : sol) if (s == k) { kInSol = true; break; }
+                if (kInSol) continue;
+
+                bestK = k;
+                bestKcost = inst.cost[k];
+            }
+
+            if (bestK != -1)
+            {
+                sol[pos] = bestK;
+                for (int e : inst.coverElems[bestK]) cov[e]++;
+                improved = true;
+            }
+            else
+            {
+                // restaura j
+                for (int e : inst.coverElems[j]) cov[e]++;
+            }
+        }
+
+        // tenta remover j sem reposição (caso ele virou redundante)
+        if (improved)
+        {
+            int newCost = removeRedundant(inst, sol);
+            (void)newCost;
+        }
+    }
+
+    int total = 0;
+    for (int j : sol) total += inst.cost[j];
+    return total;
+}
+
+// ============================================================
 //  lerInstanciaORLibrary
 // ============================================================
 bool lerInstanciaORLibrary(const string& caminho, Instance& inst)
@@ -712,15 +1026,15 @@ bool lerInstanciaORLibrary(const string& caminho, Instance& inst)
 // ============================================================
 double runLagrangian(const Instance& inst,
                      const vector<bool>& alive,
-                     int     UB,
+                     int&    UB,                    // ref: pode ser melhorado
                      int     maxIter,
-                     double* u_out)
+                     double* u_out,
+                     vector<int>* bestUBSolOut = nullptr)
 {
     int m = inst.m;
     int n = inst.n;
 
     vector<double> u(m + 1, 0.0);
-    // inicialização: u_i = min_{j alive, i in S_j} c_j / |S_j|
     for (int i = 1; i <= m; i++)
     {
         double mn = 1e18;
@@ -745,11 +1059,11 @@ double runLagrangian(const Instance& inst,
     vector<char>   xj(n + 1, 0);
     vector<int>    coveredCount(m + 1, 0);
 
+    int    bestSeenUB = UB;
+    vector<int> bestSeenSol;
+
     for (int iter = 0; iter < maxIter; iter++)
     {
-        // 1) reduced cost de cada conjunto: c_j - sum_{i in S_j} u_i
-        // 2) x_j(u) = 1 sse reducedCost[j] < 0
-        // 3) L(u) = sum_i u_i + sum_j x_j * reducedCost[j]
         double Lu = 0.0;
         for (int i = 1; i <= m; i++) Lu += u[i];
 
@@ -766,25 +1080,38 @@ double runLagrangian(const Instance& inst,
         if (Lu > bestLB) { bestLB = Lu; uBest = u; noImprove = 0; }
         else             noImprove++;
 
+        // a cada 50 iters, tenta extrair UB via greedy guiado por u
+        if (bestUBSolOut != nullptr && (iter % 50) == 49)
+        {
+            vector<int> heurSol;
+            int hUB = greedyByReducedCost(inst, alive, u.data(), heurSol);
+            if (hUB != INT_MAX) {
+                int hUB2 = removeRedundant(inst, heurSol);
+                if (hUB2 < bestSeenUB) {
+                    bestSeenUB = hUB2;
+                    bestSeenSol = heurSol;
+                }
+            }
+        }
+
         if (noImprove >= halveAfter) { lambda *= 0.5; noImprove = 0; }
         if (lambda < 5e-4)            break;
 
-        // subgradient g_i = 1 - sum_{j : xj=1, i in S_j} 1
         for (int i = 1; i <= m; i++) coveredCount[i] = 0;
         for (int j = 1; j <= n; j++)
             if (xj[j])
                 for (int e : inst.coverElems[j]) coveredCount[e]++;
 
-        // |g|^2
         double gnorm2 = 0.0;
         for (int i = 1; i <= m; i++)
         {
             double g = 1.0 - coveredCount[i];
             gnorm2 += g * g;
         }
-        if (gnorm2 < 1e-12) break;   // ótimo Lagrangiano alcançado
+        if (gnorm2 < 1e-12) break;
 
-        double T = lambda * (UB - Lu) / gnorm2;
+        // step size com UB possivelmente atualizado durante a busca
+        double T = lambda * (bestSeenUB - Lu) / gnorm2;
         if (T <= 0) T = 1e-6;
 
         for (int i = 1; i <= m; i++)
@@ -793,12 +1120,78 @@ double runLagrangian(const Instance& inst,
             u[i] = max(0.0, u[i] + T * g);
         }
 
-        // poda por gap inteiro
-        if (ceil(bestLB - 1e-9) >= UB) break;
+        if (ceil(bestLB - 1e-9) >= bestSeenUB) break;
     }
 
     for (int i = 1; i <= m; i++) u_out[i] = uBest[i];
+    UB = bestSeenUB;
+    if (bestUBSolOut != nullptr) *bestUBSolOut = bestSeenSol;
     return bestLB;
+}
+
+// ============================================================
+//  dualAscent — refina u (já factível) aumentando-o enquanto
+//  mantém factibilidade dual.
+//
+//  Para cada elemento i, calcula a folga máxima possível:
+//      delta_i = min_{j alive : i in S_j} slack_j
+//      onde slack_j = c_j - sum_{k in S_j} u_k
+//
+//  Aumenta u_i por delta_i (se positivo), atualiza slacks, repete.
+//  Em uma passada completa pode dar ganho significativo.
+//
+//  Iteramos várias passadas — pára quando ninguém melhora.
+//  Output: novo u (factível) com sum u_i potencialmente maior.
+// ============================================================
+double dualAscent(const Instance& inst,
+                  const vector<bool>& alive,
+                  double* u)
+{
+    int m = inst.m;
+    int n = inst.n;
+
+    vector<double> slack(n + 1, 0.0);
+    for (int j = 1; j <= n; j++)
+    {
+        if (!alive[j]) { slack[j] = 1e18; continue; }
+        double s = inst.cost[j];
+        for (int e : inst.coverElems[j]) s -= u[e];
+        slack[j] = max(0.0, s);
+    }
+
+    bool improved = true;
+    int  passes   = 0;
+    while (improved && passes < 100)
+    {
+        improved = false;
+        passes++;
+
+        for (int i = 1; i <= m; i++)
+        {
+            // delta_i = min slack[j] sobre j alive contendo i
+            double delta = 1e18;
+            for (int j0 : inst.elemSets[i - 1])
+            {
+                int j = j0 + 1;
+                if (!alive[j]) continue;
+                if (slack[j] < delta) delta = slack[j];
+            }
+            if (delta > 1e-9)
+            {
+                u[i] += delta;
+                for (int j0 : inst.elemSets[i - 1])
+                {
+                    int j = j0 + 1;
+                    if (alive[j]) slack[j] -= delta;
+                }
+                improved = true;
+            }
+        }
+    }
+
+    double sum = 0.0;
+    for (int i = 1; i <= m; i++) sum += u[i];
+    return sum;
 }
 
 // ============================================================
@@ -905,8 +1298,10 @@ int main(int argc, char* argv[])
 {
     string caminho = "scp41.txt";
     if (argc >= 2) caminho = argv[1];
+    if (argc >= 3) TIME_LIMIT_SEC = atof(argv[2]);
 
-    cout << "iniciando set cover (instancia: " << caminho << ")\n";
+    cout << "iniciando set cover (instancia: " << caminho
+         << ", time-limit: " << TIME_LIMIT_SEC << "s)\n";
 
     Instance inst;
     if (!lerInstanciaORLibrary(caminho, inst))
@@ -928,15 +1323,42 @@ int main(int argc, char* argv[])
     cout << "[GREEDY] UB inicial = " << greedyUB
          << "  (|sol|=" << greedySol.size() << ")\n";
 
-    // ---- 3. Lagrangian subgradient (no nó raiz) ----
+    // ---- 3. Lagrangian subgradient (no nó raiz) com UB-tracking ----
     static double u_opt[MAXCOL];
     cout << "[LAGRANGIAN] iniciando subgradient...\n";
-    double LB_lag = runLagrangian(inst, alive, greedyUB, 2000, u_opt);
+    vector<int> lagSol;
+    int    UB_var = greedyUB;
+    double LB_lag = runLagrangian(inst, alive, UB_var, 5000, u_opt, &lagSol);
+
+    // Re-run em fase fina: usa UB_var (possivelmente melhor) e mais iters
+    if (UB_var < greedyUB && UB_var > (int)ceil(LB_lag - 1e-9)) {
+        static double u_opt2[MAXCOL];
+        vector<int> lagSol2;
+        int UB_var2 = UB_var;
+        double LB_lag2 = runLagrangian(inst, alive, UB_var2, 3000, u_opt2, &lagSol2);
+        if (LB_lag2 > LB_lag) {
+            LB_lag = LB_lag2;
+            for (int i = 1; i <= inst.m; i++) u_opt[i] = u_opt2[i];
+            cout << "[LAGRANGIAN] segunda fase melhorou LB para " << LB_lag2 << "\n";
+        }
+        if (UB_var2 < UB_var) {
+            UB_var = UB_var2;
+            lagSol = lagSol2;
+        }
+    }
+
     int    LB_int = (int)ceil(LB_lag - 1e-9);
     cout << fixed << setprecision(4)
          << "[LAGRANGIAN] LB = " << LB_lag
-         << " (ceil=" << LB_int << ", UB=" << greedyUB << ")\n"
+         << " (ceil=" << LB_int << ", UB=" << UB_var << ")\n"
          << defaultfloat;
+
+    if (UB_var < greedyUB) {
+        greedyUB  = UB_var;
+        greedySol = lagSol;
+        cout << "[LAGRANGIAN] UB melhorado durante subgradient: " << greedyUB
+             << " (|sol|=" << greedySol.size() << ")\n";
+    }
 
     // ---- 4. reduced-cost fixing ----
     reducedCostFixing(inst, alive, u_opt, LB_lag, greedyUB);
@@ -951,28 +1373,33 @@ int main(int argc, char* argv[])
     cout << "[PROJECT] sum u_i (projetado, LB direto) = " << sumProj
          << " (perda vs L(u)=" << (LB_lag - sumProj) << ")\n";
 
-    // ---- 4c. UB melhor: greedy guiado pelos reduced costs +
-    //         remoção de conjuntos redundantes ----
-    vector<int> rcSol;
-    int rcUB = greedyByReducedCost(inst, alive, u_opt, rcSol);
-    int rcUBcleaned = removeRedundant(inst, rcSol);
-    cout << "[GREEDY-RC] UB via reduced cost = " << rcUB
-         << "  apos remover redundantes = " << rcUBcleaned
-         << "  (|sol|=" << rcSol.size() << ")\n";
+    // ---- 4b'. dual ascent — refina u factível para maximizar sum u_i ----
+    double sumAscent = dualAscent(inst, alive, u_opt);
+    cout << "[ASCENT] LB direto pos ascent = " << sumAscent
+         << " (ganho vs projecao: " << (sumAscent - sumProj) << ")\n";
+    if (sumAscent > LB_lag) {
+        LB_lag = sumAscent;
+        LB_int = (int)ceil(LB_lag - 1e-9);
+        cout << "[ASCENT] LB Lagrangiano atualizado para " << LB_lag
+             << " (ceil=" << LB_int << ")\n";
+    }
 
-    // tambem limpa redundantes do greedy classico
-    vector<int> chvCleanedSol = greedySol;
-    int chvCleaned = removeRedundant(inst, chvCleanedSol);
-    cout << "[GREEDY-CHV-CLEAN] UB Chvatal apos remover redundantes = "
-         << chvCleaned << " (|sol|=" << chvCleanedSol.size() << ")\n";
+    // ---- 4c. UB melhor: iterated greedy + 2-opt local search ----
+    vector<int> bestSolPool;
+    int igUB = iteratedGreedy(inst, alive, u_opt, 50, bestSolPool);
+    cout << "[ITER-GREEDY] UB pos iterated greedy = " << igUB
+         << " (|sol|=" << bestSolPool.size() << ")\n";
 
-    // pega o menor
-    if (rcUBcleaned < chvCleaned) {
-        greedyUB = rcUBcleaned;
-        greedySol = rcSol;
-    } else {
-        greedyUB = chvCleaned;
-        greedySol = chvCleanedSol;
+    int lsUB = localSearch2opt(inst, alive, bestSolPool);
+    if (lsUB < igUB) {
+        cout << "[2-OPT] melhorou UB: " << igUB << " -> " << lsUB
+             << " (|sol|=" << bestSolPool.size() << ")\n";
+    }
+    igUB = lsUB;
+
+    if (igUB < greedyUB) {
+        greedyUB  = igUB;
+        greedySol = bestSolPool;
     }
     cout << "[UB-FINAL] " << greedyUB << " (|sol|=" << greedySol.size() << ")\n";
 
@@ -992,6 +1419,11 @@ int main(int argc, char* argv[])
     for (int i = 1; i <= inst.m; i++) lbActiveSum += u_star[i];
     rootLB = lbActiveSum;
 
+    // Referencias para 2-opt no incumbent
+    g_inst             = &inst;
+    g_alive            = &alive;
+    g_localSearch2opt  = localSearch2opt;
+
     cout << "Instancia carregada com sucesso!\n";
     cout << "Elementos (DLX colunas) : " << nElems << "\n";
     cout << "Conjuntos (DLX linhas)  : " << nSets  << "\n";
@@ -1006,6 +1438,14 @@ int main(int argc, char* argv[])
     else
     {
         search(0, nElems, 0);
+
+        // Se a busca completou (não foi interrompida por timeout),
+        // bestCost é o ótimo provado por exaustão do B&B.
+        if (!stopSearch && bestSolSize > 0)
+        {
+            cout << "[OTIMO] Busca B&B completou sem time-limit; bestCost e otimo.\n";
+            provedOptimal = true;
+        }
     }
 
     double tWallTotal = gTimer.elapsedWall();
