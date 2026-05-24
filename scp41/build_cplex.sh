@@ -2,7 +2,8 @@
 # Compila cplex_scp.cpp no WSL Ubuntu
 set -e
 
-CPLEX="/home/micaelsv/CPLEX_Studio129"
+#CPLEX="/home/micaelsv/CPLEX_Studio129"
+CPLEX="/home/leo/CPLEX_Studio2211"
 
 if [ ! -d "$CPLEX" ]; then
     echo "ERRO: CPLEX nao encontrado em $CPLEX"
