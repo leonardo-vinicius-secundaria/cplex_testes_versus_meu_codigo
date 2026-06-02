@@ -1,0 +1,111 @@
+============================================
+ Set Cover Problem — CPLEX Solver
+ Instancia: instancias/scpa3.txt
+============================================
+
+Elementos (m) : 300
+Conjuntos (n) : 3000
+
+Iniciando otimizacao...
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_Simplex_Display                         0
+CPXPARAM_Threads                                 1
+CPXPARAM_TimeLimit                               3
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+Found incumbent of value 149151.000000 after 0.00 sec. (0.16 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 0 rows and 99 columns.
+Reduced MIP has 300 rows, 2901 columns, and 17913 nonzeros.
+Reduced MIP has 2901 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (10.13 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 300 rows, 2901 columns, and 17913 nonzeros.
+Reduced MIP has 2901 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (7.89 ticks)
+Probing time = 0.00 sec. (0.35 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.02 sec. (13.54 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                       143529.0000        0.0000           100.00%
+      0     0      228.0000   101   143529.0000      228.0000      328   99.84%
+*     0+    0                          258.0000      228.0000            11.63%
+*     0+    0                          239.0000      228.0000             4.60%
+      0     0      228.4167   109      239.0000      Cuts: 33      362    4.43%
+      0     0      228.8803   105      239.0000      Cuts: 22      398    4.23%
+*     0+    0                          237.0000      228.8803             3.43%
+*     0+    0                          233.0000      228.8803             1.77%
+      0     0  -1.00000e+75     0      233.0000      228.8803      398    1.77%
+Detecting symmetries...
+
+Repeating presolve.
+Tried aggregator 1 time.
+MIP Presolve eliminated 19 rows and 2668 columns.
+Reduced MIP has 281 rows, 233 columns, and 1426 nonzeros.
+Reduced MIP has 233 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (2.03 ticks)
+Probing time = 0.00 sec. (0.09 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 281 rows, 233 columns, and 1426 nonzeros.
+Reduced MIP has 233 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.66 ticks)
+Represolve time = 0.01 sec. (7.19 ticks)
+Probing time = 0.00 sec. (0.09 ticks)
+Clique table members: 16.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.01 sec. (7.14 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          233.0000      228.8803             1.77%
+      0     0      228.8803   105      233.0000      228.8803      737    1.77%
+      0     0      229.1136   108      233.0000      Cuts: 19      775    1.67%
+      0     0      229.3225   106      233.0000      Cuts: 12      813    1.58%
+      0     0      229.3636   108      233.0000       Cuts: 8      828    1.56%
+      0     0      229.3969   107      233.0000       Cuts: 6      851    1.55%
+      0     0      229.4316   112      233.0000   ZeroHalf: 7      877    1.53%
+Detecting symmetries...
+      0     0      229.4810   115      233.0000   ZeroHalf: 4      908    1.51%
+      0     0      229.4883   107      233.0000   ZeroHalf: 3      923    1.51%
+      0     0      229.5017   106      233.0000   ZeroHalf: 1      938    1.50%
+      0     0      229.5263   108      233.0000       Cuts: 4      963    1.49%
+      0     0      229.5263   111      233.0000       Cuts: 2      966    1.49%
+*     0+    0                          232.0000      229.5263             1.07%
+Detecting symmetries...
+      0     2      229.5263   111      232.0000      229.5341      966    1.06%
+Elapsed time = 1.17 sec. (487.23 ticks, tree = 0.01 MB, solutions = 7)
+
+Zero-half cuts applied:  16
+Lift and project cuts applied:  4
+
+Root node processing (before b&c):
+  Real time             =    1.17 sec. (487.43 ticks)
+Sequential b&c:
+  Real time             =    0.02 sec. (17.19 ticks)
+                          ------------
+Total (root+branch&cut) =    1.20 sec. (504.63 ticks)
+
+============================================
+ RESULTADOS
+============================================
+Status CPLEX  : Optimal
+Tempo (s)     : 1.19777
+Valor obj.    : 232
+Melhor bound  : 232
+MIP gap (%)   : 0
+Conjuntos sel.: 70
+
+Conjuntos selecionados (1-based):
+1 2 3 4 5 7 8 10 11 12 13 14 16 17 18 19 24 25 30 33 34 35 37 39 40 43 44 45 47 51 56 61 62 63 65 68 70 71 72 75 79 82 87 92 94 102 103 106 107 108 113 116 117 134 135 140 141 146 156 159 163 193 195 204 206 210 227 240 342 384 
+
+Solucao valida: SIM

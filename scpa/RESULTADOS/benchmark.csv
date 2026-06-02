@@ -1,0 +1,6 @@
+instance,known_opt,cplex_cost,cplex_sets,cplex_wall,cplex_status,cplex_gap_known,dlx_cost,dlx_sets,dlx_wall,dlx_status,dlx_gap_known
+scpa1,253,253,67,1.55057,Optimal,0,254,67,3.0385,Feasible,1
+scpa2,252,252,68,1.37226,Optimal,0,252,70,3.1087,Feasible,0
+scpa3,232,232,70,1.19777,Optimal,0,233,70,3.0435,Feasible,1
+scpa4,234,234,67,0.276431,Optimal,0,234,67,3.0363,Feasible,0
+scpa5,236,236,72,0.179402,Optimal,0,236,72,2.5401,Optimal,0

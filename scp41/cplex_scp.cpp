@@ -148,14 +148,16 @@ int main(int argc, char* argv[]) {
         cplex.setParam(IloCplex::Param::MIP::Display,   2);
         cplex.setParam(IloCplex::Param::Simplex::Display, 0);
 
-        // Tolerâncias padrão (MIP gap relativo de 0,01 %)
-        cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 1e-4);
+        // Comparacao justa com o DLX exato: exige prova de otimalidade.
+        cplex.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 0.0);
 
         // Limite de tempo (segundos) — configurável via argv[2]
         cplex.setParam(IloCplex::Param::TimeLimit, timeLimit);
 
-        // Threads — usa todos os disponíveis (0 = automático)
-        cplex.setParam(IloCplex::Param::Threads, 0);
+        // Comparacao justa com o DLX: execucao sequencial em uma thread.
+        // Threads = 0 deixa o CPLEX escolher automaticamente e pode usar
+        // todos os nucleos disponiveis.
+        cplex.setParam(IloCplex::Param::Threads, 1);
 
         // Exporta o modelo LP para inspeção (opcional)
         // cplex.exportModel("scp41.lp");

@@ -1,0 +1,43 @@
+iniciando set cover (instancia: instancias/scpa4.txt, time-limit: 3s)
+[LEITURA] m=300 elementos | n=3000 conjuntos
+[LEITURA] Custos lidos. Faixa: 1..100
+[LEITURA] Cobertura lida. Total de 1s na matriz: 18084
+[PRESOLVE] Conjuntos dominados removidos: 102 (sobraram 2898)
+[GREEDY] UB inicial = 278  (|sol|=89)
+[LAGRANGIAN] iniciando subgradient...
+[LAGRANGIAN] LB = 231.1183 (ceil=232, UB=238)
+[LAGRANGIAN] UB melhorado durante subgradient: 238 (|sol|=66)
+[RCFIX] Conjuntos eliminados por reduced-cost: 2571 (sobraram 429 conjuntos)
+[PROJECT] sum u_i (projetado, LB direto) = 231.1 (perda vs L(u)=-1.198e-05)
+[ASCENT] LB direto pos ascent = 231.1 (ganho vs projecao: 0.0001132)
+[ASCENT] LB Lagrangiano atualizado para 231.1 (ceil=232)
+[ITER-GREEDY] UB pos iterated greedy = 234 (|sol|=67)
+[UB-FINAL] 234 (|sol|=67)
+[BUILD] DLX construida. Nos totais: 2435 (max=200000)
+
+Instancia carregada com sucesso!
+Elementos (DLX colunas) : 300
+Conjuntos (DLX linhas)  : 3000
+Limite de tempo         : 3 s
+
+[PROGRESSO] nos=100000 | podas=86257 | bestCost=234 | wall=2.95s
+[PROGRESSO] nos=200000 | podas=172761 | bestCost=234 | wall=2.99s
+[PROGRESSO] nos=300000 | podas=260604 | bestCost=234 | wall=3.04s
+[STOP] Limite de tempo (3s) atingido. Retornando melhor solucao conhecida.
+
+=== RESULTADO FINAL ===
+Custo minimo : 234
+Num. conjuntos: 67
+Conjuntos escolhidos: 431 337 272 250 247 227 220 216 207 164 166 161 156 119 123 133 153 126 140 121 94 112 75 73 61 66 59 67 83 88 63 69 74 57 36 48 33 39 58 35 49 34 55 40 46 47 42 44 10 3 15 6 26 4 27 5 24 9 21 1 7 20 22 31 2 13 11 
+[AVISO] Solucao pode nao ser otima — busca interrompida por time-limit.
+
+Estatisticas de busca:
+  Nos explorados : 300000
+  Podas          : 260605
+
++-------------------------------------------------+
+|        RESUMO DE TEMPO  (CPLEX-style)           |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :     3.0363 s |
+| Tempo de CPU   (CPU time)      :     3.0356 s |
++-------------------------------------------------+

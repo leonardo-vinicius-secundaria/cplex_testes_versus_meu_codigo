@@ -1,0 +1,42 @@
+iniciando set cover (instancia: instancias/scpa3.txt, time-limit: 3s)
+[LEITURA] m=300 elementos | n=3000 conjuntos
+[LEITURA] Custos lidos. Faixa: 1..100
+[LEITURA] Cobertura lida. Total de 1s na matriz: 18077
+[PRESOLVE] Conjuntos dominados removidos: 99 (sobraram 2901)
+[GREEDY] UB inicial = 270  (|sol|=91)
+[LAGRANGIAN] iniciando subgradient...
+[LAGRANGIAN] segunda fase melhorou LB para 227.868
+[LAGRANGIAN] LB = 227.8678 (ceil=228, UB=238)
+[LAGRANGIAN] UB melhorado durante subgradient: 238 (|sol|=71)
+[RCFIX] Conjuntos eliminados por reduced-cost: 2463 (sobraram 537 conjuntos)
+[PROJECT] sum u_i (projetado, LB direto) = 227.9 (perda vs L(u)=-5.794e-05)
+[ASCENT] LB direto pos ascent = 227.9 (ganho vs projecao: 0.0002478)
+[ASCENT] LB Lagrangiano atualizado para 227.9 (ceil=228)
+[ITER-GREEDY] UB pos iterated greedy = 233 (|sol|=70)
+[UB-FINAL] 233 (|sol|=70)
+[BUILD] DLX construida. Nos totais: 3101 (max=200000)
+
+Instancia carregada com sucesso!
+Elementos (DLX colunas) : 300
+Conjuntos (DLX linhas)  : 3000
+Limite de tempo         : 3 s
+
+[PROGRESSO] nos=100000 | podas=89442 | bestCost=233 | wall=3.04s
+[STOP] Limite de tempo (3s) atingido. Retornando melhor solucao conhecida.
+
+=== RESULTADO FINAL ===
+Custo minimo : 233
+Num. conjuntos: 70
+Conjuntos escolhidos: 444 342 244 258 237 192 204 158 156 187 140 141 148 152 146 110 111 113 114 105 127 117 126 107 135 79 94 102 103 61 66 68 70 72 75 85 80 49 37 43 39 35 40 47 33 30 34 51 56 31 44 54 17 11 8 13 2 5 10 18 12 4 16 15 3 6 7 24 1 25 
+[AVISO] Solucao pode nao ser otima — busca interrompida por time-limit.
+
+Estatisticas de busca:
+  Nos explorados : 100000
+  Podas          : 89443
+
++-------------------------------------------------+
+|        RESUMO DE TEMPO  (CPLEX-style)           |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :     3.0435 s |
+| Tempo de CPU   (CPU time)      :     3.0435 s |
++-------------------------------------------------+

@@ -1,0 +1,42 @@
+iniciando set cover (instancia: instancias/scpa5.txt, time-limit: 3s)
+[LEITURA] m=300 elementos | n=3000 conjuntos
+[LEITURA] Custos lidos. Faixa: 1..100
+[LEITURA] Cobertura lida. Total de 1s na matriz: 18072
+[PRESOLVE] Conjuntos dominados removidos: 101 (sobraram 2899)
+[GREEDY] UB inicial = 271  (|sol|=89)
+[LAGRANGIAN] iniciando subgradient...
+[LAGRANGIAN] LB = 234.7759 (ceil=235, UB=237)
+[LAGRANGIAN] UB melhorado durante subgradient: 237 (|sol|=68)
+[RCFIX] Conjuntos eliminados por reduced-cost: 2694 (sobraram 306 conjuntos)
+[PROJECT] sum u_i (projetado, LB direto) = 234.8 (perda vs L(u)=-3.263e-06)
+[ASCENT] LB direto pos ascent = 234.8 (ganho vs projecao: 3.821e-05)
+[ASCENT] LB Lagrangiano atualizado para 234.8 (ceil=235)
+[ITER-GREEDY] UB pos iterated greedy = 236 (|sol|=72)
+[UB-FINAL] 236 (|sol|=72)
+[BUILD] DLX construida. Nos totais: 1641 (max=200000)
+
+Instancia carregada com sucesso!
+Elementos (DLX colunas) : 300
+Conjuntos (DLX linhas)  : 3000
+Limite de tempo         : 3 s
+
+[PROGRESSO] nos=100000 | podas=73628 | bestCost=236 | wall=2.40s
+[PROGRESSO] nos=200000 | podas=147083 | bestCost=236 | wall=2.50s
+[OTIMO] Busca B&B completou sem time-limit; bestCost e otimo.
+
+=== RESULTADO FINAL ===
+Custo minimo : 236
+Num. conjuntos: 72
+Conjuntos escolhidos: 289 206 209 212 203 179 186 176 159 151 158 161 121 119 139 128 140 138 133 146 110 92 95 94 91 90 88 99 100 69 75 65 72 83 78 76 63 64 71 58 49 39 37 34 36 48 42 53 52 54 41 6 11 8 20 16 21 14 22 29 10 27 7 3 9 2 13 4 15 28 1 5 
+[OK] Solucao OTIMA provada (bestCost == LB Lagrangiano).
+
+Estatisticas de busca:
+  Nos explorados : 244520
+  Podas          : 179103
+
++-------------------------------------------------+
+|        RESUMO DE TEMPO  (CPLEX-style)           |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :     2.5401 s |
+| Tempo de CPU   (CPU time)      :     2.5400 s |
++-------------------------------------------------+
