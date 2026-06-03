@@ -24,7 +24,7 @@ Tried aggregator 1 time.
 Detecting symmetries...
 Reduced MIP has 200 rows, 1819 columns, and 7729 nonzeros.
 Reduced MIP has 1819 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.00 sec. (3.68 ticks)
+Presolve time = 0.01 sec. (3.68 ticks)
 Probing time = 0.00 sec. (0.20 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
@@ -51,7 +51,7 @@ Total (root+branch&cut) =    0.03 sec. (15.18 ticks)
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.0272136
+Tempo (s)     : 0.0257531
 Valor obj.    : 213
 Melhor bound  : 213
 MIP gap (%)   : 0

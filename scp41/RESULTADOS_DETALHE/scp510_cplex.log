@@ -36,20 +36,20 @@ Root relaxation solution time = 0.00 sec. (1.61 ticks)
 
 *     0+    0                        92499.0000        0.0000           100.00%
 *     0     0      integral     0      265.0000      265.0000      126    0.00%
-Elapsed time = 0.03 sec. (13.46 ticks, tree = 0.00 MB, solutions = 2)
+Elapsed time = 0.02 sec. (13.46 ticks, tree = 0.00 MB, solutions = 2)
 
 Root node processing (before b&c):
-  Real time             =    0.03 sec. (13.55 ticks)
+  Real time             =    0.02 sec. (13.55 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.03 sec. (13.55 ticks)
+Total (root+branch&cut) =    0.02 sec. (13.55 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.0273149
+Tempo (s)     : 0.0213978
 Valor obj.    : 265
 Melhor bound  : 265
 MIP gap (%)   : 0

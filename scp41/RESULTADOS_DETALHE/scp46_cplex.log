@@ -57,7 +57,7 @@ Total (root+branch&cut) =    0.02 sec. (11.56 ticks)
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.0214962
+Tempo (s)     : 0.0190341
 Valor obj.    : 560
 Melhor bound  : 560
 MIP gap (%)   : 0

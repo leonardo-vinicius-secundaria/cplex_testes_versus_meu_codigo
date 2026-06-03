@@ -196,8 +196,15 @@ void printTimingSummary(double tWall, double tCPU)
 }
 
 // ============================================================
-//  cover / uncover — só lista horizontal de cabeçalhos.
-//  Mantém lbActiveSum em O(1) para LB incremental.
+//  cover / uncover — remove/recoloca apenas o cabecalho da coluna.
+//
+//  Em Set Cover, linhas que intersectam uma coluna ja coberta NAO ficam
+//  incompatíveis: elas ainda podem cobrir outros elementos ativos. Por isso
+//  nao usamos o cover completo do DLX/Exact Cover aqui.
+//
+//  As linhas indisponiveis por branching (used/forbidden) sao removidas
+//  verticalmente por disableRowNodes(), mantendo colSize exato nas colunas
+//  ativas sem mudar a semantica do SCP.
 // ============================================================
 void cover(int c)
 {
@@ -220,6 +227,36 @@ inline bool colunaAtiva(int c) { return colAtiva[c]; }
 inline bool rowAvailable(int row)
 {
     return !usedInBranch[row] && !forbiddenRow[row];
+}
+
+void disableRowNodes(int rowNode, vector<int>& removedNodes)
+{
+    int n = rowNode;
+    do
+    {
+        int c = colID[n];
+        if (colunaAtiva(c))
+        {
+            downN[upN[n]] = downN[n];
+            upN[downN[n]] = upN[n];
+            colSize[c]--;
+            removedNodes.push_back(n);
+        }
+        n = rightN[n];
+    } while (n != rowNode);
+}
+
+void restoreRowNodes(vector<int>& removedNodes)
+{
+    for (int idx = (int)removedNodes.size() - 1; idx >= 0; idx--)
+    {
+        int n = removedNodes[idx];
+        int c = colID[n];
+        downN[upN[n]] = n;
+        upN[downN[n]] = n;
+        colSize[c]++;
+    }
+    removedNodes.clear();
 }
 
 int effectiveCount(int c, int* onlyNode = nullptr, int* minCostOut = nullptr)
@@ -250,28 +287,23 @@ int chooseColumn()
     int best = -1;
     int bestCnt = INT_MAX;
     double bestU = -1.0;
-    int bestMinCost = INT_MAX;
 
-    // Primário: menor número real de candidatos disponíveis.
-    // Desempates: maior multiplicador lagrangiano e menor custo mínimo.
+    // Como disableRowNodes()/restoreRowNodes() mantem colSize efetivo,
+    // a escolha volta a ser O(numero de colunas ativas), no espirito DLX.
     for (int c = rightN[header]; c != header; c = rightN[c])
     {
-        int minCost = INT_MAX;
-        int cnt = effectiveCount(c, nullptr, &minCost);
+        int cnt = colSize[c];
         if (cnt == 0) return c;
 
         bool better =
             (cnt < bestCnt) ||
-            (cnt == bestCnt && u_star[c] > bestU + 1e-12) ||
-            (cnt == bestCnt && fabs(u_star[c] - bestU) <= 1e-12 &&
-             minCost < bestMinCost);
+            (cnt == bestCnt && u_star[c] > bestU + 1e-12);
 
         if (better)
         {
             best = c;
             bestCnt = cnt;
             bestU = u_star[c];
-            bestMinCost = minCost;
         }
     }
     return best;
@@ -397,10 +429,9 @@ void search(int k, int MAX_K, int custoAtual)
     if (k >= MAX_K) return;
 
     int c = chooseColumn();
-    if (c == -1 || effectiveCount(c) == 0) { totalPodas++; return; }
+    if (c == -1 || colSize[c] == 0) { totalPodas++; return; }
 
     cover(c);
-    colSize[c]--;
 
     // ---- ORDENA LINHAS CANDIDATAS -------------------------
     // Buffers locais (heap) — std::vector evita estouro de pilha
@@ -460,6 +491,7 @@ void search(int k, int MAX_K, int custoAtual)
         if (stopSearch) break;
 
         vector<int> proibidosAgora;
+        vector<int> nosProibidosAgora;
         proibidosAgora.reserve(ci);
         for (size_t p = 0; p < ci; p++)
         {
@@ -467,6 +499,7 @@ void search(int k, int MAX_K, int custoAtual)
             if (!forbiddenRow[prevRow])
             {
                 forbiddenRow[prevRow] = true;
+                disableRowNodes(candidatos[p].node, nosProibidosAgora);
                 proibidosAgora.push_back(prevRow);
             }
         }
@@ -476,6 +509,7 @@ void search(int k, int MAX_K, int custoAtual)
 
         if (forbiddenRow[row] || usedInBranch[row])
         {
+            restoreRowNodes(nosProibidosAgora);
             for (int x : proibidosAgora) forbiddenRow[x] = false;
             continue;
         }
@@ -484,12 +518,15 @@ void search(int k, int MAX_K, int custoAtual)
         if (novoCusto >= bestCost)
         {
             totalPodas++;
+            restoreRowNodes(nosProibidosAgora);
             for (int x : proibidosAgora) forbiddenRow[x] = false;
             continue;
         }
 
         usedInBranch[row]   = true;
         solution[solSize++] = r;
+        vector<int> nosLinhaSelecionada;
+        disableRowNodes(r, nosLinhaSelecionada);
 
         // Lista de colunas cobertas por esta linha — local ao escopo
         vector<int> cobertas;
@@ -499,7 +536,6 @@ void search(int k, int MAX_K, int custoAtual)
         {
             int col = colID[j];
             if (!colunaAtiva(col)) continue;
-            colSize[col]--;
             cover(col);
             cobertas.push_back(col);
         }
@@ -509,15 +545,15 @@ void search(int k, int MAX_K, int custoAtual)
         for (int i = (int)cobertas.size() - 1; i >= 0; i--)
         {
             uncover(cobertas[i]);
-            colSize[cobertas[i]]++;
         }
+        restoreRowNodes(nosLinhaSelecionada);
         solSize--;
         usedInBranch[row] = false;
 
+        restoreRowNodes(nosProibidosAgora);
         for (int x : proibidosAgora) forbiddenRow[x] = false;
     }
 
-    colSize[c]++;
     uncover(c);
 }
 
@@ -1385,6 +1421,21 @@ double projectDualFeasible(const Instance& inst,
     return sum;
 }
 
+double maxDualViolation(const Instance& inst,
+                        const vector<bool>& alive,
+                        const double* u)
+{
+    double maxViol = 0.0;
+    for (int j = 1; j <= inst.n; j++)
+    {
+        if (!alive[j]) continue;
+        double s = 0.0;
+        for (int e : inst.coverElems[j]) s += u[e];
+        maxViol = max(maxViol, s - (double)inst.cost[j]);
+    }
+    return maxViol;
+}
+
 // ============================================================
 //  reducedCostFixing — remove conjuntos que não podem fazer
 //  parte de qualquer solução com custo < UB.
@@ -1521,6 +1572,13 @@ int main(int argc, char* argv[])
 
     // ---- 4b'. dual ascent — refina u factível para maximizar sum u_i ----
     double sumAscent = dualAscent(inst, alive, u_opt);
+    double dualViol = maxDualViolation(inst, alive, u_opt);
+    if (dualViol > 1e-7)
+    {
+        cout << "[ASCENT] aviso: violacao dual max = " << dualViol
+             << ". Reprojetando multiplicadores.\n";
+        sumAscent = projectDualFeasible(inst, alive, u_opt);
+    }
     cout << "[ASCENT] LB direto pos ascent = " << sumAscent
          << " (ganho vs projecao: " << (sumAscent - sumProj) << ")\n";
     if (sumAscent > LB_lag) {

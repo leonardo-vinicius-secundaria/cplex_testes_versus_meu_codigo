@@ -23,7 +23,7 @@ Tried aggregator 1 time.
 Detecting symmetries...
 Reduced MIP has 200 rows, 1000 columns, and 10002 nonzeros.
 Reduced MIP has 1000 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.00 sec. (3.81 ticks)
+Presolve time = 0.01 sec. (3.81 ticks)
 Probing time = 0.00 sec. (0.16 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
@@ -57,7 +57,7 @@ Detecting symmetries...
 Reduced MIP has 198 rows, 108 columns, and 1125 nonzeros.
 Reduced MIP has 108 binaries, 0 generals, 0 SOSs, and 0 indicators.
 Presolve time = 0.00 sec. (0.48 ticks)
-Represolve time = 0.01 sec. (3.27 ticks)
+Represolve time = 0.00 sec. (3.27 ticks)
 Probing time = 0.00 sec. (0.06 ticks)
 Clique table members: 3.
 MIP emphasis: balance optimality and feasibility.
@@ -91,24 +91,24 @@ Detecting symmetries...
       0     0      142.9914    77      146.0000   ZeroHalf: 2      719    2.06%
 Detecting symmetries...
       0     2      142.9914    77      146.0000      142.9918      719    2.06%
-Elapsed time = 0.59 sec. (400.77 ticks, tree = 0.01 MB, solutions = 7)
+Elapsed time = 0.51 sec. (400.77 ticks, tree = 0.01 MB, solutions = 7)
 
 Zero-half cuts applied:  17
 Lift and project cuts applied:  1
 Gomory fractional cuts applied:  1
 
 Root node processing (before b&c):
-  Real time             =    0.59 sec. (400.82 ticks)
+  Real time             =    0.51 sec. (400.82 ticks)
 Sequential b&c:
-  Real time             =    0.02 sec. (14.65 ticks)
+  Real time             =    0.01 sec. (14.65 ticks)
                           ------------
-Total (root+branch&cut) =    0.61 sec. (415.47 ticks)
+Total (root+branch&cut) =    0.53 sec. (415.47 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.61046
+Tempo (s)     : 0.525977
 Valor obj.    : 146
 Melhor bound  : 146
 MIP gap (%)   : 0

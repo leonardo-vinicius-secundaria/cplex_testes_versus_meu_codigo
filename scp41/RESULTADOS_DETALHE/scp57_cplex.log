@@ -18,7 +18,7 @@ Tried aggregator 1 time.
 MIP Presolve eliminated 0 rows and 177 columns.
 Reduced MIP has 200 rows, 1823 columns, and 7789 nonzeros.
 Reduced MIP has 1823 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.01 sec. (4.88 ticks)
+Presolve time = 0.00 sec. (4.88 ticks)
 Probing time = 0.00 sec. (0.20 ticks)
 Tried aggregator 1 time.
 Detecting symmetries...
@@ -40,24 +40,24 @@ Root relaxation solution time = 0.00 sec. (2.62 ticks)
       0     0      293.0000    29      298.0000      Cuts: 19      172    1.68%
 *     0     0      integral     0      293.0000       Cuts: 6      173    0.00%
       0     0        cutoff            293.0000      293.0000      173    0.00%
-Elapsed time = 0.05 sec. (25.66 ticks, tree = 0.01 MB, solutions = 3)
+Elapsed time = 0.04 sec. (25.66 ticks, tree = 0.01 MB, solutions = 3)
 
 Zero-half cuts applied:  12
 Lift and project cuts applied:  2
 Gomory fractional cuts applied:  3
 
 Root node processing (before b&c):
-  Real time             =    0.05 sec. (25.80 ticks)
+  Real time             =    0.04 sec. (25.80 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.05 sec. (25.80 ticks)
+Total (root+branch&cut) =    0.04 sec. (25.80 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.0467715
+Tempo (s)     : 0.0365846
 Valor obj.    : 293
 Melhor bound  : 293
 MIP gap (%)   : 0

@@ -28,7 +28,7 @@ Probing time = 0.00 sec. (0.15 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: none, using 1 thread.
-Root relaxation solution time = 0.01 sec. (5.31 ticks)
+Root relaxation solution time = 0.00 sec. (5.31 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
@@ -79,24 +79,24 @@ Detecting symmetries...
       0     0      134.8472    73      140.0000   ZeroHalf: 1      573    3.68%
 Detecting symmetries...
       0     2      134.8472    73      140.0000      134.8475      573    3.68%
-Elapsed time = 0.37 sec. (250.88 ticks, tree = 0.01 MB, solutions = 7)
+Elapsed time = 0.30 sec. (250.88 ticks, tree = 0.01 MB, solutions = 7)
 *     9     3      integral     0      138.0000      135.1678      930    2.05%
 
 Zero-half cuts applied:  12
 Gomory fractional cuts applied:  2
 
 Root node processing (before b&c):
-  Real time             =    0.37 sec. (250.95 ticks)
+  Real time             =    0.30 sec. (250.95 ticks)
 Sequential b&c:
-  Real time             =    0.02 sec. (13.95 ticks)
+  Real time             =    0.01 sec. (13.95 ticks)
                           ------------
-Total (root+branch&cut) =    0.39 sec. (264.89 ticks)
+Total (root+branch&cut) =    0.31 sec. (264.89 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.386441
+Tempo (s)     : 0.313853
 Valor obj.    : 138
 Melhor bound  : 138
 MIP gap (%)   : 0

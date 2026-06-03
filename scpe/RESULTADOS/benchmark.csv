@@ -1,0 +1,6 @@
+instance,cplex_cost,cplex_sets,cplex_wall,cplex_status,dlx_cost,dlx_sets,dlx_wall,dlx_status
+scpe1,5,5,0.694138,Optimal,5,5,0.4400,Optimal
+scpe2,5,5,0.551646,Optimal,5,5,1.2867,Optimal
+scpe3,5,5,1.7139,Optimal,5,5,1.7091,Optimal
+scpe4,5,5,1.34888,Optimal,5,5,1.4085,Optimal
+scpe5,5,5,0.947382,Optimal,5,5,1.3626,Optimal
