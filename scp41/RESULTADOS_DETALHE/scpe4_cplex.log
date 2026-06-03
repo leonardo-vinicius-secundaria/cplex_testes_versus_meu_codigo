@@ -1,0 +1,87 @@
+============================================
+ Set Cover Problem — CPLEX Solver
+ Instancia: instancias/scpe4.txt
+============================================
+
+Elementos (m) : 50
+Conjuntos (n) : 500
+
+Iniciando otimizacao...
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_Simplex_Display                         0
+CPXPARAM_Threads                                 1
+CPXPARAM_TimeLimit                               60
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+Found incumbent of value 500.000000 after 0.00 sec. (0.03 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 50 rows, 500 columns, and 4952 nonzeros.
+Reduced MIP has 500 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (1.46 ticks)
+Probing time = 0.00 sec. (0.08 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 50 rows, 500 columns, and 4952 nonzeros.
+Reduced MIP has 500 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (1.67 ticks)
+Probing time = 0.00 sec. (0.08 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.00 sec. (4.55 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          500.0000        0.0000           100.00%
+      0     0        3.4540    46      500.0000        3.4540      146   99.31%
+*     0+    0                            8.0000        3.4540            56.83%
+*     0+    0                            7.0000        3.4540            50.66%
+      0     0        3.4918    42        7.0000      Fract: 1      187   50.12%
+*     0+    0                            5.0000        3.4918            30.16%
+      0     0        3.5033    41        5.0000   ZeroHalf: 1      211   29.93%
+      0     0        3.5086    41        5.0000   ZeroHalf: 1      230   29.83%
+      0     0        3.5146    44        5.0000   ZeroHalf: 1      245   29.71%
+      0     0        3.5208    45        5.0000   ZeroHalf: 1      264   29.58%
+Detecting symmetries...
+      0     0        3.5260    46        5.0000   ZeroHalf: 1      281   29.48%
+      0     0        3.5353    49        5.0000   ZeroHalf: 1      317   29.29%
+      0     0        3.5486    49        5.0000   ZeroHalf: 1      349   29.03%
+      0     0        3.5522    44        5.0000   ZeroHalf: 1      366   28.96%
+      0     0        3.5801    43        5.0000   ZeroHalf: 1      404   28.40%
+      0     0        3.5956    45        5.0000   ZeroHalf: 1      426   28.09%
+      0     0        3.6605    46        5.0000   ZeroHalf: 1      472   26.79%
+      0     0        3.6744    45        5.0000   ZeroHalf: 1      501   26.51%
+      0     0        3.7015    42        5.0000   ZeroHalf: 1      535   25.97%
+      0     0        4.0000    30        5.0000   ZeroHalf: 1      551   20.00%
+      0     0        4.0000    27        5.0000   ZeroHalf: 1      560   20.00%
+      0     0        4.0000    24        5.0000   ZeroHalf: 1      565   20.00%
+Detecting symmetries...
+      0     2        4.0000    24        5.0000        4.0000      565   20.00%
+Elapsed time = 0.25 sec. (147.25 ticks, tree = 0.01 MB, solutions = 4)
+    208   112        cutoff              5.0000        4.0000     8375   20.00%
+    278    42        cutoff              5.0000        4.0000    19486   20.00%
+
+Zero-half cuts applied:  3
+
+Root node processing (before b&c):
+  Real time             =    0.24 sec. (147.25 ticks)
+Sequential b&c:
+  Real time             =    0.55 sec. (560.73 ticks)
+                          ------------
+Total (root+branch&cut) =    0.79 sec. (707.98 ticks)
+
+============================================
+ RESULTADOS
+============================================
+Status CPLEX  : Optimal
+Tempo (s)     : 0.79216
+Valor obj.    : 5
+Melhor bound  : 5
+MIP gap (%)   : 0
+Conjuntos sel.: 5
+
+Conjuntos selecionados (1-based):
+1 18 21 26 48 
+
+Solucao valida: SIM

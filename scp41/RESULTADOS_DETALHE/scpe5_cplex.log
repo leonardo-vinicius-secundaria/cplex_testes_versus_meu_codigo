@@ -1,0 +1,88 @@
+============================================
+ Set Cover Problem — CPLEX Solver
+ Instancia: instancias/scpe5.txt
+============================================
+
+Elementos (m) : 50
+Conjuntos (n) : 500
+
+Iniciando otimizacao...
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_Simplex_Display                         0
+CPXPARAM_Threads                                 1
+CPXPARAM_TimeLimit                               60
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+Found incumbent of value 500.000000 after 0.00 sec. (0.03 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 50 rows, 500 columns, and 5017 nonzeros.
+Reduced MIP has 500 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (1.46 ticks)
+Probing time = 0.00 sec. (0.08 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 50 rows, 500 columns, and 5017 nonzeros.
+Reduced MIP has 500 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (1.67 ticks)
+Probing time = 0.00 sec. (0.08 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.01 sec. (5.29 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          500.0000        0.0000           100.00%
+      0     0        3.3908    44      500.0000        3.3908      194   99.32%
+*     0+    0                            9.0000        3.3908            62.32%
+*     0+    0                            6.0000        3.3908            43.49%
+      0     0        3.4393    44        6.0000      Fract: 1      220   42.68%
+      0     0        3.4470    45        6.0000   ZeroHalf: 1      250   42.55%
+      0     0        3.4524    45        6.0000   ZeroHalf: 1      262   42.46%
+      0     0        3.4629    44        6.0000   ZeroHalf: 1      282   42.28%
+*     0+    0                            5.0000        3.4629            30.74%
+      0     0        3.4727    44        5.0000   ZeroHalf: 1      300   30.55%
+Detecting symmetries...
+      0     0        3.4904    39        5.0000   ZeroHalf: 1      332   30.19%
+      0     0        3.5010    44        5.0000   ZeroHalf: 1      349   29.98%
+      0     0        3.5063    42        5.0000   ZeroHalf: 1      360   29.87%
+      0     0        3.5197    42        5.0000   ZeroHalf: 1      383   29.61%
+      0     0        3.5341    41        5.0000   ZeroHalf: 1      405   29.32%
+      0     0        3.5436    44        5.0000   ZeroHalf: 1      419   29.13%
+      0     0        3.5584    44        5.0000   ZeroHalf: 1      437   28.83%
+      0     0        3.5640    44        5.0000   ZeroHalf: 1      455   28.72%
+      0     0        3.5797    45        5.0000   ZeroHalf: 1      475   28.41%
+      0     0        3.6096    41        5.0000   ZeroHalf: 1      514   27.81%
+      0     0        3.6269    46        5.0000   ZeroHalf: 1      540   27.46%
+      0     0        4.0000    22        5.0000   ZeroHalf: 1      566   20.00%
+      0     0        4.0000    22        5.0000   ZeroHalf: 1      572   20.00%
+Detecting symmetries...
+      0     2        4.0000    21        5.0000        4.0000      572   20.00%
+Elapsed time = 0.23 sec. (172.02 ticks, tree = 0.01 MB, solutions = 4)
+    187   103        cutoff              5.0000        4.0000     8651   20.00%
+    248    46        cutoff              5.0000        4.0000    19026   20.00%
+
+Zero-half cuts applied:  1
+
+Root node processing (before b&c):
+  Real time             =    0.23 sec. (172.02 ticks)
+Sequential b&c:
+  Real time             =    0.50 sec. (648.37 ticks)
+                          ------------
+Total (root+branch&cut) =    0.73 sec. (820.39 ticks)
+
+============================================
+ RESULTADOS
+============================================
+Status CPLEX  : Optimal
+Tempo (s)     : 0.730103
+Valor obj.    : 5
+Melhor bound  : 5
+MIP gap (%)   : 0
+Conjuntos sel.: 5
+
+Conjuntos selecionados (1-based):
+2 3 25 28 31 
+
+Solucao valida: SIM

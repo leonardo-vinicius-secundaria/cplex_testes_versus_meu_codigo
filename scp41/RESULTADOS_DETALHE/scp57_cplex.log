@@ -1,0 +1,69 @@
+============================================
+ Set Cover Problem — CPLEX Solver
+ Instancia: instancias/scp57.txt
+============================================
+
+Elementos (m) : 200
+Conjuntos (n) : 2000
+
+Iniciando otimizacao...
+
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+CPXPARAM_Simplex_Display                         0
+CPXPARAM_Threads                                 1
+CPXPARAM_TimeLimit                               60
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+Found incumbent of value 101245.000000 after 0.00 sec. (0.10 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 0 rows and 177 columns.
+Reduced MIP has 200 rows, 1823 columns, and 7789 nonzeros.
+Reduced MIP has 1823 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (4.88 ticks)
+Probing time = 0.00 sec. (0.20 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 200 rows, 1823 columns, and 7789 nonzeros.
+Reduced MIP has 1823 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (3.73 ticks)
+Probing time = 0.00 sec. (0.20 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.00 sec. (2.62 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                        90669.0000        0.0000           100.00%
+      0     0      291.7778    33    90669.0000      291.7778      162   99.68%
+*     0+    0                          298.0000      291.7778             2.09%
+      0     0      293.0000    29      298.0000      Cuts: 19      172    1.68%
+*     0     0      integral     0      293.0000       Cuts: 6      173    0.00%
+      0     0        cutoff            293.0000      293.0000      173    0.00%
+Elapsed time = 0.05 sec. (25.66 ticks, tree = 0.01 MB, solutions = 3)
+
+Zero-half cuts applied:  12
+Lift and project cuts applied:  2
+Gomory fractional cuts applied:  3
+
+Root node processing (before b&c):
+  Real time             =    0.05 sec. (25.80 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.05 sec. (25.80 ticks)
+
+============================================
+ RESULTADOS
+============================================
+Status CPLEX  : Optimal
+Tempo (s)     : 0.0467715
+Valor obj.    : 293
+Melhor bound  : 293
+MIP gap (%)   : 0
+Conjuntos sel.: 64
+
+Conjuntos selecionados (1-based):
+1 2 3 5 6 7 8 10 11 12 14 15 16 17 18 20 21 23 24 25 26 28 29 30 33 35 36 41 42 44 46 47 50 52 56 57 60 61 63 65 69 75 77 81 82 92 95 99 102 105 106 111 114 157 159 160 174 190 193 204 229 233 348 351 
+
+Solucao valida: SIM

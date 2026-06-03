@@ -91,6 +91,7 @@ int  bestCost  = INT_MAX;
 int  bestSol[MAXSOL];   // armazena rowID
 int  bestSolSize = 0;
 bool usedInBranch[MAXROW];
+bool forbiddenRow[MAXROW];
 
 long long totalNos    = 0;
 long long totalPodas  = 0;
@@ -216,37 +217,125 @@ void uncover(int c)
 
 inline bool colunaAtiva(int c) { return colAtiva[c]; }
 
+inline bool rowAvailable(int row)
+{
+    return !usedInBranch[row] && !forbiddenRow[row];
+}
+
+int effectiveCount(int c, int* onlyNode = nullptr, int* minCostOut = nullptr)
+{
+    int cnt = 0;
+    int only = -1;
+    int minCost = INT_MAX;
+
+    for (int r = downN[c]; r != c; r = downN[r])
+    {
+        int row = rowID[r];
+        if (!rowAvailable(row)) continue;
+        cnt++;
+        only = r;
+        if (rowCost[row] < minCost) minCost = rowCost[row];
+    }
+
+    if (onlyNode) *onlyNode = only;
+    if (minCostOut) *minCostOut = minCost;
+    return cnt;
+}
+
 // ============================================================
-//  chooseColumn — heurística S melhorada
+//  chooseColumn — escolhe o elemento mais restritivo
 // ============================================================
 int chooseColumn()
 {
-    int    best      = -1;
-    double bestScore = -1e18;
+    int best = -1;
+    int bestCnt = INT_MAX;
+    double bestU = -1.0;
+    int bestMinCost = INT_MAX;
 
-    // Heurística híbrida:
-    //   primário:   u_star[c]   (coluna que mais contribui ao LB)
-    //   secundário: colSize[c]  (menor = menos opções no branching)
-    //   terciário:  inversa do mínimo custo das linhas que cobrem c
+    // Primário: menor número real de candidatos disponíveis.
+    // Desempates: maior multiplicador lagrangiano e menor custo mínimo.
     for (int c = rightN[header]; c != header; c = rightN[c])
     {
-        // calcula min_rowcost só se necessário (caro)
         int minCost = INT_MAX;
-        for (int r = downN[c]; r != c; r = downN[r])
-        {
-            int row = rowID[r];
-            if (usedInBranch[row]) continue;
-            if (rowCost[row] < minCost) minCost = rowCost[row];
-        }
-        if (minCost == INT_MAX) minCost = 1;
+        int cnt = effectiveCount(c, nullptr, &minCost);
+        if (cnt == 0) return c;
 
-        // u_star tem peso forte, mas combinado com tamanho e custo mínimo:
-        double score = u_star[c] * 1e6
-                       - colSize[c] * 100.0
-                       + (double)minCost / 1000.0;
-        if (score > bestScore) { bestScore = score; best = c; }
+        bool better =
+            (cnt < bestCnt) ||
+            (cnt == bestCnt && u_star[c] > bestU + 1e-12) ||
+            (cnt == bestCnt && fabs(u_star[c] - bestU) <= 1e-12 &&
+             minCost < bestMinCost);
+
+        if (better)
+        {
+            best = c;
+            bestCnt = cnt;
+            bestU = u_star[c];
+            bestMinCost = minCost;
+        }
     }
     return best;
+}
+
+struct BranchCandidate
+{
+    double score = 0.0;
+    double greedyScore = 0.0;
+    int newCovers = 0;
+    int cost = 0;
+    int node = -1;
+    int row = -1;
+    vector<uint64_t> newCoverBits;
+};
+
+static bool bitSubset(const vector<uint64_t>& a, const vector<uint64_t>& b)
+{
+    for (size_t i = 0; i < a.size(); i++)
+        if (a[i] & ~b[i]) return false;
+    return true;
+}
+
+static bool sameBits(const vector<uint64_t>& a, const vector<uint64_t>& b)
+{
+    for (size_t i = 0; i < a.size(); i++)
+        if (a[i] != b[i]) return false;
+    return true;
+}
+
+static void removeDominatedCandidates(vector<BranchCandidate>& cand)
+{
+    vector<char> dominated(cand.size(), 0);
+    int removed = 0;
+
+    for (size_t b = 0; b < cand.size(); b++)
+    {
+        for (size_t a = 0; a < cand.size(); a++)
+        {
+            if (a == b || dominated[a]) continue;
+            if (cand[a].cost > cand[b].cost) continue;
+            if (!bitSubset(cand[b].newCoverBits, cand[a].newCoverBits)) continue;
+
+            bool strictlyBetter = cand[a].cost < cand[b].cost ||
+                                  !sameBits(cand[a].newCoverBits, cand[b].newCoverBits);
+            bool sameButLowerId = cand[a].cost == cand[b].cost &&
+                                  sameBits(cand[a].newCoverBits, cand[b].newCoverBits) &&
+                                  cand[a].row < cand[b].row;
+            if (strictlyBetter || sameButLowerId)
+            {
+                dominated[b] = 1;
+                removed++;
+                break;
+            }
+        }
+    }
+
+    if (removed == 0) return;
+
+    vector<BranchCandidate> kept;
+    kept.reserve(cand.size() - removed);
+    for (size_t i = 0; i < cand.size(); i++)
+        if (!dominated[i]) kept.push_back(std::move(cand[i]));
+    cand.swap(kept);
 }
 
 // ============================================================
@@ -308,7 +397,7 @@ void search(int k, int MAX_K, int custoAtual)
     if (k >= MAX_K) return;
 
     int c = chooseColumn();
-    if (c == -1 || colSize[c] == 0) { totalPodas++; return; }
+    if (c == -1 || effectiveCount(c) == 0) { totalPodas++; return; }
 
     cover(c);
     colSize[c]--;
@@ -317,34 +406,87 @@ void search(int k, int MAX_K, int custoAtual)
     // Buffers locais (heap) — std::vector evita estouro de pilha
     // em recursões profundas e elimina problema de realocação
     // (ponteiros invalidados após search recursivo).
-    vector<pair<double,int>> candidatos;
+    vector<BranchCandidate> candidatos;
     candidatos.reserve(64);
+    int words = (nElems + 63) / 64;
 
     for (int r = downN[c]; r != c; r = downN[r])
     {
         int row = rowID[r];
-        if (usedInBranch[row]) continue;
+        if (!rowAvailable(row)) continue;
 
         int novasCoberturas = 1;
-        for (int j = rightN[r]; j != r; j = rightN[j])
-            if (colunaAtiva(colID[j])) novasCoberturas++;
+        double dualGain = u_star[c];
+        vector<uint64_t> bits(words, 0);
+        bits[(c - 1) >> 6] |= (uint64_t)1 << ((c - 1) & 63);
 
-        double score = (double)rowCost[row] / novasCoberturas;
-        candidatos.push_back({score, r});
+        for (int j = rightN[r]; j != r; j = rightN[j])
+        {
+            int col = colID[j];
+            if (!colunaAtiva(col)) continue;
+            novasCoberturas++;
+            dualGain += u_star[col];
+            bits[(col - 1) >> 6] |= (uint64_t)1 << ((col - 1) & 63);
+        }
+
+        double reduced = (double)rowCost[row] - dualGain;
+        BranchCandidate cand;
+        cand.score = reduced / novasCoberturas;
+        cand.greedyScore = (double)rowCost[row] / novasCoberturas;
+        cand.newCovers = novasCoberturas;
+        cand.cost = rowCost[row];
+        cand.node = r;
+        cand.row = row;
+        cand.newCoverBits = std::move(bits);
+        candidatos.push_back(std::move(cand));
     }
 
-    sort(candidatos.begin(), candidatos.end());
+    removeDominatedCandidates(candidatos);
+
+    sort(candidatos.begin(), candidatos.end(),
+         [](const BranchCandidate& a, const BranchCandidate& b)
+         {
+             if (fabs(a.score - b.score) > 1e-12) return a.score < b.score;
+             if (fabs(a.greedyScore - b.greedyScore) > 1e-12)
+                 return a.greedyScore < b.greedyScore;
+             if (a.newCovers != b.newCovers) return a.newCovers > b.newCovers;
+             if (a.cost != b.cost) return a.cost < b.cost;
+             return a.row < b.row;
+         });
 
     // ---- EXPLORA ------------------------------------------
     for (size_t ci = 0; ci < candidatos.size(); ci++)
     {
         if (stopSearch) break;
 
-        int r   = candidatos[ci].second;
-        int row = rowID[r];
+        vector<int> proibidosAgora;
+        proibidosAgora.reserve(ci);
+        for (size_t p = 0; p < ci; p++)
+        {
+            int prevRow = candidatos[p].row;
+            if (!forbiddenRow[prevRow])
+            {
+                forbiddenRow[prevRow] = true;
+                proibidosAgora.push_back(prevRow);
+            }
+        }
+
+        int r   = candidatos[ci].node;
+        int row = candidatos[ci].row;
+
+        if (forbiddenRow[row] || usedInBranch[row])
+        {
+            for (int x : proibidosAgora) forbiddenRow[x] = false;
+            continue;
+        }
 
         int novoCusto = custoAtual + rowCost[row];
-        if (novoCusto >= bestCost) { totalPodas++; continue; }
+        if (novoCusto >= bestCost)
+        {
+            totalPodas++;
+            for (int x : proibidosAgora) forbiddenRow[x] = false;
+            continue;
+        }
 
         usedInBranch[row]   = true;
         solution[solSize++] = r;
@@ -371,6 +513,8 @@ void search(int k, int MAX_K, int custoAtual)
         }
         solSize--;
         usedInBranch[row] = false;
+
+        for (int x : proibidosAgora) forbiddenRow[x] = false;
     }
 
     colSize[c]++;
@@ -396,6 +540,7 @@ void initDLX(int cols)
     rightN[cols] = 0;
     nodeCount    = cols + 1;
     memset(usedInBranch, false, sizeof(usedInBranch));
+    memset(forbiddenRow, false, sizeof(forbiddenRow));
     // u_star setado depois; lbActiveSum recalculado depois
 }
 
@@ -557,9 +702,10 @@ int greedyChvatal(const Instance& inst,
 //  greedyByReducedCost — UB warm-start usando reduced costs
 //
 //  Após Lagrangian, os reduced costs c_j - sum_{i in S_j} u_i
-//  refletem "quão atraente" é cada conjunto. Conjuntos com
-//  reduced cost pequeno entram com prioridade. Score:
-//     max(0, rc_j) / |S_j ∩ uncovered|
+//  refletem "quão atraente" é cada conjunto. Misturamos custo
+//  reduzido e custo real para evitar que muitos rc <= 0 empatem
+//  com score zero e virem quase "menor indice". Score:
+//     (0.7 * max(0, rc_j) + 0.3 * cost_j) / |S_j ∩ uncovered|
 // ============================================================
 int greedyByReducedCost(const Instance& inst,
                         const vector<bool>& alive,
@@ -591,7 +737,7 @@ int greedyByReducedCost(const Instance& inst,
         for (int j = 1; j <= n; j++)
         {
             if (!alive[j] || remaining[j] == 0) continue;
-            double effCost = max(0.0, rc[j]);
+            double effCost = 0.7 * max(0.0, rc[j]) + 0.3 * inst.cost[j];
             double sc = effCost / remaining[j];
             if (sc < best) { best = sc; bestJ = j; }
         }
@@ -805,7 +951,7 @@ int iteratedGreedy(const Instance& inst,
                     if (!alive[j] || remaining[j] == 0) continue;
                     double rc = inst.cost[j];
                     for (int e : inst.coverElems[j]) rc -= u[e];
-                    double effCost = max(1.0, rc + (double)inst.cost[j] * 0.001);
+                    double effCost = 0.7 * max(0.0, rc) + 0.3 * inst.cost[j];
                     double sc = effCost / remaining[j];
                     if (sc < best) { best = sc; bestJ = j; }
                 }
