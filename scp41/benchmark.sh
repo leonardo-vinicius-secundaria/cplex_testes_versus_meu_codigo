@@ -61,7 +61,7 @@ for inst in "${INSTANCES[@]}"; do
     printf "CPLEX: %5s (sets=%4s, t=%7ss, %s) | " "$CC" "$CS" "$CT" "$CST"
 
     # DLX -----
-    OUT=$(timeout $((TIMEOUT_SEC + 5))s ./dlx_scp "$INSTFILE" $TIMEOUT_SEC 2>&1)
+    OUT=$(timeout $((TIMEOUT_SEC + 10))s ./dlx_scp "$INSTFILE" $TIMEOUT_SEC --workers ${DLX_WORKERS:-1} 2>&1)
     EXIT=$?
     # Remove logs intermediarios para nao acumular lixo na pasta
     if [ -f "$DETDIR/${inst}_dlx.log" ]; then rm -f "$DETDIR/${inst}_dlx.log"; fi

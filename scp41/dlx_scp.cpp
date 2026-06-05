@@ -98,6 +98,21 @@ long long totalPodas  = 0;
 bool      stopSearch  = false;
 bool      provedOptimal = false;
 
+// Estratégia de busca (varia entre workers em modo paralelo)
+//
+// O default (seed=0) usa "só u_star" que provou empiricamente ser a melhor
+// estratégia geral. Workers paralelos diversificam com outras heurísticas.
+//
+//   0: só u_star (LB-puro) -- DEFAULT, melhor estratégia geral
+//   1: u_star * 1e6 - colSize * 100 + minCost / 1000  (mistura híbrida)
+//   2: u_star * 1e6 - colSize * 1   + minCost / 1000  (variação leve)
+//   3: u_star * 1e3 - colSize * 100 + minCost
+//   4: minCost * 1000 + colSize     (heurística antiga, boa pra UB)
+//   5: u_star * colSize             (mistura multiplicativa)
+//   6: só colSize                   (DLX clássico min-S)
+//   7: u_star alto + minCost alto   (foco em coluna cara)
+int  seedStrategy = 0;
+
 // referencias globais para 2-opt no incumbent (set by main before search)
 struct Instance;
 const struct Instance*    g_inst  = nullptr;
@@ -273,6 +288,43 @@ int chooseColumn()
             bestU = u_star[c];
             bestMinCost = minCost;
         }
+        if (minCost == INT_MAX) minCost = 1;
+
+        double score;
+        switch (seedStrategy % 8) {
+            case 1:
+                // mistura híbrida (era seed=0 antiga)
+                score = u_star[c] * 1e6 - colSize[c] * 100.0 + (double)minCost / 1000.0;
+                break;
+            case 2:
+                // variação leve
+                score = u_star[c] * 1e6 - colSize[c] * 1.0 + (double)minCost / 1000.0;
+                break;
+            case 3:
+                // outra mistura
+                score = u_star[c] * 1e3 - colSize[c] * 100.0 + (double)minCost;
+                break;
+            case 4:
+                // heurística antiga (UB-orientada): score baixo = melhor
+                score = -((double)minCost * 1000.0 + colSize[c]);
+                break;
+            case 5:
+                // u_star * colSize (mistura multiplicativa)
+                score = u_star[c] * (double)colSize[c];
+                break;
+            case 6:
+                // só colSize (DLX clássico)
+                score = -(double)colSize[c];
+                break;
+            case 7:
+                // foco em coluna cara
+                score = u_star[c] * 1e6 + (double)minCost * 100.0 - (double)colSize[c];
+                break;
+            default: // 0 = MELHOR ESTRATÉGIA GERAL (só u_star, LB-puro)
+                score = u_star[c];
+                break;
+        }
+        if (score > bestScore) { bestScore = score; best = c; }
     }
     return best;
 }
@@ -873,7 +925,7 @@ int iteratedGreedy(const Instance& inst,
                    int nIters,
                    vector<int>& bestSolOut)
 {
-    mt19937 rng(42);
+    mt19937 rng(42 + seedStrategy * 1009);
     int bestC = INT_MAX;
     bestSolOut.clear();
 
@@ -1440,14 +1492,227 @@ void buildDLX(const Instance& inst, const vector<bool>& alive)
 // ============================================================
 //  main
 // ============================================================
+// ============================================================
+//  runSubprocessWorker — lança ./dlx_scp em modo single-thread
+//  com uma seed específica e retorna stdout completo.
+// ============================================================
+struct WorkerResult {
+    int    cost = INT_MAX;
+    int    sets = 0;
+    double wall = 0.0;
+    bool   optimal = false;
+    string raw;
+    int    seed = 0;
+    vector<int> solution;
+};
+
+WorkerResult runWorker(const string& exePath,
+                       const string& instancia,
+                       double timeLimit,
+                       int seed)
+{
+    WorkerResult r;
+    r.seed = seed;
+
+    string cmd = exePath + " \"" + instancia + "\" "
+                 + to_string((long long)timeLimit)
+                 + " --seed " + to_string(seed) + " --quiet 2>&1";
+
+    FILE* p = popen(cmd.c_str(), "r");
+    if (!p) return r;
+
+    char buf[4096];
+    while (fgets(buf, sizeof(buf), p)) r.raw += buf;
+    pclose(p);
+
+    // parse simples
+    auto findIntAfter = [&](const string& key) -> int {
+        size_t i = r.raw.find(key);
+        if (i == string::npos) return -1;
+        i += key.size();
+        // pula ate digito ou sinal
+        while (i < r.raw.size() && !isdigit(r.raw[i]) && r.raw[i] != '-') i++;
+        return atoi(r.raw.c_str() + i);
+    };
+    auto findDoubleAfter = [&](const string& key) -> double {
+        size_t i = r.raw.find(key);
+        if (i == string::npos) return -1.0;
+        i += key.size();
+        while (i < r.raw.size() && !isdigit(r.raw[i]) && r.raw[i] != '-' && r.raw[i] != '.') i++;
+        return atof(r.raw.c_str() + i);
+    };
+
+    r.cost = findIntAfter("Custo minimo : ");
+    r.sets = findIntAfter("Num. conjuntos: ");
+    r.wall = findDoubleAfter("Tempo de parede (Elapsed time) :");
+    r.optimal = (r.raw.find("OTIMA provada") != string::npos);
+
+    // parse "Conjuntos escolhidos: ..."
+    size_t i = r.raw.find("Conjuntos escolhidos:");
+    if (i != string::npos)
+    {
+        i += strlen("Conjuntos escolhidos:");
+        size_t end = r.raw.find('\n', i);
+        if (end == string::npos) end = r.raw.size();
+        string line = r.raw.substr(i, end - i);
+        stringstream ss(line);
+        int x;
+        while (ss >> x) r.solution.push_back(x);
+    }
+
+    return r;
+}
+
+// ============================================================
+//  main
+// ============================================================
 int main(int argc, char* argv[])
 {
     string caminho = "scp41.txt";
-    if (argc >= 2) caminho = argv[1];
-    if (argc >= 3) TIME_LIMIT_SEC = atof(argv[2]);
+    int    workers = 1;
+    int    cliSeed = 0;
+    bool   quiet   = false;
 
-    cout << "iniciando set cover (instancia: " << caminho
-         << ", time-limit: " << TIME_LIMIT_SEC << "s)\n";
+    // Argumentos: <inst> <time_limit> [--seed K] [--workers N] [--quiet]
+    vector<string> args(argv + 1, argv + argc);
+    if (args.size() >= 1 && args[0][0] != '-') caminho = args[0];
+    if (args.size() >= 2 && args[1][0] != '-') TIME_LIMIT_SEC = atof(args[1].c_str());
+
+    for (size_t i = 0; i < args.size(); i++)
+    {
+        if (args[i] == "--seed"    && i + 1 < args.size()) cliSeed = atoi(args[++i].c_str());
+        else if (args[i] == "--workers" && i + 1 < args.size()) workers = atoi(args[++i].c_str());
+        else if (args[i] == "--quiet") quiet = true;
+    }
+    seedStrategy = cliSeed;
+
+    if (workers > 1)
+    {
+        // ===== modo MASTER: lança N subprocessos paralelos =====
+        cout << "[MASTER] lancando " << workers << " workers em paralelo\n";
+
+        // path do proprio binario
+        string exePath = argv[0];
+
+        // dispara workers em threads (cada thread espera seu subprocesso)
+        vector<thread>        ths;
+        vector<WorkerResult>  results(workers);
+        vector<FILE*>         pipes(workers, nullptr);
+        atomic<bool>          gotOptimal{false};
+
+        Timer masterTimer;
+        masterTimer.start();
+
+        // mutex para iniciar processos sem race
+        mutex pipeMtx;
+
+        for (int w = 0; w < workers; w++) {
+            ths.emplace_back([&, w]() {
+                string cmd = exePath + " \"" + caminho + "\" "
+                             + to_string((long long)TIME_LIMIT_SEC)
+                             + " --seed " + to_string(w) + " --quiet 2>&1";
+                FILE* p = popen(cmd.c_str(), "r");
+                if (!p) return;
+                {
+                    lock_guard<mutex> lk(pipeMtx);
+                    pipes[w] = p;
+                }
+                char buf[4096];
+                string raw;
+                while (fgets(buf, sizeof(buf), p)) raw += buf;
+                pclose(p);
+
+                // parse
+                WorkerResult r;
+                r.seed = w;
+                r.raw = raw;
+                auto findIntAfter = [&](const string& key) -> int {
+                    size_t i = raw.find(key);
+                    if (i == string::npos) return -1;
+                    i += key.size();
+                    while (i < raw.size() && !isdigit(raw[i]) && raw[i] != '-') i++;
+                    return atoi(raw.c_str() + i);
+                };
+                auto findDoubleAfter = [&](const string& key) -> double {
+                    size_t i = raw.find(key);
+                    if (i == string::npos) return -1.0;
+                    i += key.size();
+                    while (i < raw.size() && !isdigit(raw[i]) && raw[i] != '-' && raw[i] != '.') i++;
+                    return atof(raw.c_str() + i);
+                };
+                r.cost    = findIntAfter("Custo minimo : ");
+                r.sets    = findIntAfter("Num. conjuntos: ");
+                r.wall    = findDoubleAfter("Tempo de parede (Elapsed time) :");
+                r.optimal = (raw.find("OTIMA provada") != string::npos);
+
+                size_t i = raw.find("Conjuntos escolhidos:");
+                if (i != string::npos) {
+                    i += strlen("Conjuntos escolhidos:");
+                    size_t end = raw.find('\n', i);
+                    if (end == string::npos) end = raw.size();
+                    string line = raw.substr(i, end - i);
+                    stringstream ss(line);
+                    int x;
+                    while (ss >> x) r.solution.push_back(x);
+                }
+
+                results[w] = r;
+
+                // Se este worker provou ótimo, mata os outros
+                if (r.optimal && !gotOptimal.exchange(true)) {
+                    lock_guard<mutex> lk(pipeMtx);
+                    for (int k = 0; k < (int)pipes.size(); k++) {
+                        if (k == w || pipes[k] == nullptr) continue;
+                        // mata o processo associado ao pipe
+                        // (popen não dá pid direto; pkill -f resolve)
+                        string killCmd = "pkill -f 'dlx_scp.*--seed " + to_string(k) + " --quiet'";
+                        system(killCmd.c_str());
+                    }
+                }
+            });
+        }
+        for (auto& t : ths) t.join();
+
+        // escolhe o melhor
+        WorkerResult best;
+        for (auto& r : results) {
+            cout << "[WORKER seed=" << r.seed << "] "
+                 << "custo=" << r.cost << " sets=" << r.sets
+                 << " wall=" << r.wall << "s optimal=" << r.optimal << "\n";
+            if (r.cost > 0 && (best.cost == INT_MAX || r.cost < best.cost
+                               || (r.cost == best.cost && r.optimal && !best.optimal)))
+                best = r;
+        }
+
+        double tWallMaster = masterTimer.elapsedWall();
+
+        cout << "\n=== RESULTADO FINAL (PORTFOLIO " << workers << " workers) ===\n";
+        cout << "Custo minimo : " << best.cost << "\n";
+        cout << "Num. conjuntos: " << best.sets << "\n";
+        cout << "Conjuntos escolhidos: ";
+        for (int x : best.solution) cout << x << " ";
+        cout << "\n";
+        if (best.optimal)
+            cout << "[OK] Solucao OTIMA provada (worker seed=" << best.seed << ").\n";
+        else
+            cout << "[AVISO] Nenhum worker provou otimalidade.\n";
+
+        cout << "\n+-------------------------------------------------+\n";
+        cout << "|   RESUMO DE TEMPO PORTFOLIO (master wall)       |\n";
+        cout << "+-------------------------------------------------+\n";
+        cout << fixed << setprecision(4)
+             << "| Tempo de parede (Elapsed time) : "
+             << setw(10) << tWallMaster << " s |\n";
+        cout << "+-------------------------------------------------+\n";
+        cout << defaultfloat;
+        return 0;
+    }
+
+    // ===== modo single-thread (worker normal) =====
+    if (!quiet)
+        cout << "iniciando set cover (instancia: " << caminho
+             << ", time-limit: " << TIME_LIMIT_SEC << "s"
+             << ", seed=" << seedStrategy << ")\n";
 
     Instance inst;
     if (!lerInstanciaORLibrary(caminho, inst))
@@ -1474,7 +1739,7 @@ int main(int argc, char* argv[])
     cout << "[LAGRANGIAN] iniciando subgradient...\n";
     vector<int> lagSol;
     int    UB_var = greedyUB;
-    double LB_lag = runLagrangian(inst, alive, UB_var, 5000, u_opt, &lagSol);
+    double LB_lag = runLagrangian(inst, alive, UB_var, 1500, u_opt, &lagSol);
 
     // Re-run em fase fina: usa UB_var (possivelmente melhor) e mais iters
     if (UB_var < greedyUB && UB_var > (int)ceil(LB_lag - 1e-9)) {
@@ -1504,6 +1769,36 @@ int main(int argc, char* argv[])
         greedySol = lagSol;
         cout << "[LAGRANGIAN] UB melhorado durante subgradient: " << greedyUB
              << " (|sol|=" << greedySol.size() << ")\n";
+    }
+
+    // ====================================================================
+    // EARLY EXIT: se Lagrangian já provou otimalidade (LB == UB), pula
+    // todas as fases subsequentes (RCFIX, projeção, ascent, iter-greedy,
+    // 2-opt, build DLX, B&B). Isso economiza centenas de milissegundos
+    // em instâncias fáceis (scp41–510, scpe*).
+    // ====================================================================
+    if (LB_int >= greedyUB)
+    {
+        cout << "[EARLY-EXIT] LB Lagrangiano == UB; solucao otima sem precisar de B&B.\n";
+        bestCost = greedyUB;
+        bestSolSize = (int)greedySol.size();
+        for (int i = 0; i < bestSolSize; i++) bestSol[i] = greedySol[i];
+        provedOptimal = true;
+
+        double tWallTotal = gTimer.elapsedWall();
+        double tCPUTotal  = gTimer.elapsedCPU();
+
+        cout << "\n=== RESULTADO FINAL ===\n";
+        cout << "Custo minimo : " << bestCost << "\n";
+        cout << "Num. conjuntos: " << bestSolSize << "\n";
+        cout << "Conjuntos escolhidos: ";
+        for (int i = 0; i < bestSolSize; i++) cout << bestSol[i] << " ";
+        cout << "\n[OK] Solucao OTIMA provada (bestCost == LB Lagrangiano).\n";
+        cout << "\nEstatisticas de busca:\n";
+        cout << "  Nos explorados : 0\n";
+        cout << "  Podas          : 0\n";
+        printTimingSummary(tWallTotal, tCPUTotal);
+        return 0;
     }
 
     // ---- 4. reduced-cost fixing ----
