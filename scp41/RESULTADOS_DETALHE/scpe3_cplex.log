@@ -8,27 +8,25 @@ Conjuntos (n) : 500
 
 Iniciando otimizacao...
 
-Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
 CPXPARAM_Simplex_Display                         0
 CPXPARAM_Threads                                 1
 CPXPARAM_TimeLimit                               60
 CPXPARAM_MIP_Tolerances_MIPGap                   0
-Found incumbent of value 500.000000 after 0.00 sec. (0.03 ticks)
+Found incumbent of value 500.000000 after 0.00 sec. (0.04 ticks)
 Tried aggregator 1 time.
 Reduced MIP has 50 rows, 500 columns, and 5040 nonzeros.
 Reduced MIP has 500 binaries, 0 generals, 0 SOSs, and 0 indicators.
 Presolve time = 0.00 sec. (1.47 ticks)
 Probing time = 0.00 sec. (0.08 ticks)
 Tried aggregator 1 time.
-Detecting symmetries...
 Reduced MIP has 50 rows, 500 columns, and 5040 nonzeros.
 Reduced MIP has 500 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.00 sec. (1.70 ticks)
+Presolve time = 0.00 sec. (1.72 ticks)
 Probing time = 0.00 sec. (0.08 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: none, using 1 thread.
-Root relaxation solution time = 0.00 sec. (3.53 ticks)
+Root relaxation solution time = 0.00 sec. (3.54 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
@@ -37,47 +35,25 @@ Root relaxation solution time = 0.00 sec. (3.53 ticks)
       0     0        3.2989    41      500.0000        3.2989      121   99.34%
 *     0+    0                            9.0000        3.2989            63.35%
 *     0+    0                            7.0000        3.2989            52.87%
-      0     0        3.3192    43        7.0000   ZeroHalf: 1      142   52.58%
-*     0+    0                            6.0000        3.3192            44.68%
-      0     0        3.3281    43        6.0000   ZeroHalf: 1      163   44.53%
-*     0+    0                            5.0000        3.3281            33.44%
-      0     0        3.3542    44        5.0000   ZeroHalf: 1      197   32.92%
-      0     0        3.3708    45        5.0000   ZeroHalf: 1      220   32.58%
-      0     0        3.4127    43        5.0000   ZeroHalf: 1      256   31.75%
-Detecting symmetries...
-      0     0        3.4328    40        5.0000   ZeroHalf: 1      284   31.34%
-      0     0        3.4531    46        5.0000   ZeroHalf: 1      321   30.94%
-      0     0        3.4624    42        5.0000   ZeroHalf: 1      341   30.75%
-      0     0        3.5058    42        5.0000   ZeroHalf: 1      376   29.88%
-      0     0        3.5334    40        5.0000   ZeroHalf: 1      408   29.33%
-      0     0        3.5442    44        5.0000   ZeroHalf: 1      434   29.12%
-      0     0        3.5516    44        5.0000   ZeroHalf: 1      459   28.97%
-      0     0        3.5886    39        5.0000   ZeroHalf: 1      508   28.23%
-      0     0        3.6134    39        5.0000   ZeroHalf: 1      532   27.73%
-      0     0        4.0000    25        5.0000   ZeroHalf: 1      549   20.00%
-      0     0        4.0000    25        5.0000   ZeroHalf: 1      558   20.00%
-      0     0        4.0000    21        5.0000   ZeroHalf: 1      564   20.00%
-Detecting symmetries...
-      0     2        4.0000    20        5.0000        4.0000      564   20.00%
-Elapsed time = 0.22 sec. (199.56 ticks, tree = 0.01 MB, solutions = 5)
-    205   125        cutoff              5.0000        4.0000     8206   20.00%
-    282    72        cutoff              5.0000        4.0000    18713   20.00%
-    401     8        cutoff              5.0000        4.0000    29438   20.00%
+      0     0        3.3437    41        7.0000      Fract: 1      153   52.23%
+*     0+    0                            5.0000        3.3437            33.13%
+      0     2        3.3437    41        5.0000        3.3437      153   33.13%
+Elapsed time = 0.06 sec. (72.33 ticks, tree = 0.01 MB, solutions = 4)
 
-Zero-half cuts applied:  1
+Gomory fractional cuts applied:  1
 
 Root node processing (before b&c):
-  Real time             =    0.22 sec. (199.56 ticks)
+  Real time             =    0.06 sec. (72.32 ticks)
 Sequential b&c:
-  Real time             =    0.85 sec. (737.16 ticks)
+  Real time             =    0.11 sec. (136.73 ticks)
                           ------------
-Total (root+branch&cut) =    1.07 sec. (936.72 ticks)
+Total (root+branch&cut) =    0.17 sec. (209.05 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 1.07111
+Tempo (s)     : 0.166973
 Valor obj.    : 5
 Melhor bound  : 5
 MIP gap (%)   : 0

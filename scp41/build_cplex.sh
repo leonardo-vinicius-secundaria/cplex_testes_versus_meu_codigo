@@ -17,7 +17,9 @@ set -e
 
 #CPLEX="/home/micaelsv/CPLEX_Studio129"
 #CPLEX="/home/leo/CPLEX_Studio2211" #PC DO RIAN CPLEX
-CPLEX="/home/leo/CPLEX_Studio2211"
+#CPLEX="/home/leo/CPLEX_Studio2211"
+CPLEX_HOME="${1:-${CPLEX_HOME:-/home/leo/CPLEX_Studio129}}"
+
 
 if [ ! -d "$CPLEX_HOME" ]; then
     echo ""

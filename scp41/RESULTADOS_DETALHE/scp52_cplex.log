@@ -8,7 +8,6 @@ Conjuntos (n) : 2000
 
 Iniciando otimizacao...
 
-Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
 CPXPARAM_Simplex_Display                         0
 CPXPARAM_Threads                                 1
 CPXPARAM_TimeLimit                               60
@@ -21,15 +20,14 @@ Reduced MIP has 1818 binaries, 0 generals, 0 SOSs, and 0 indicators.
 Presolve time = 0.01 sec. (4.85 ticks)
 Probing time = 0.00 sec. (0.20 ticks)
 Tried aggregator 1 time.
-Detecting symmetries...
 Reduced MIP has 200 rows, 1818 columns, and 7722 nonzeros.
 Reduced MIP has 1818 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.01 sec. (3.68 ticks)
+Presolve time = 0.00 sec. (3.72 ticks)
 Probing time = 0.00 sec. (0.20 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: none, using 1 thread.
-Root relaxation solution time = 0.01 sec. (5.03 ticks)
+Root relaxation solution time = 0.01 sec. (5.04 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
@@ -38,29 +36,29 @@ Root relaxation solution time = 0.01 sec. (5.03 ticks)
       0     0      299.7611    79    91995.0000      299.7611      221   99.67%
 *     0+    0                          326.0000      299.7611             8.05%
 *     0+    0                          321.0000      299.7611             6.62%
-      0     0      301.3333    45      321.0000      Cuts: 37      269    6.13%
-*     0+    0                          304.0000      301.3333             0.88%
-      0     0      301.9100    78      304.0000      Cuts: 11      292    0.69%
-*     0+    0                          302.0000      301.9100             0.03%
-      0     0        cutoff            302.0000      301.9100      292    0.03%
-Elapsed time = 0.08 sec. (44.55 ticks, tree = 0.01 MB, solutions = 5)
+      0     0      301.3333    45      321.0000      Cuts: 37      247    6.13%
+*     0+    0                          312.0000      301.3333             3.42%
+      0     0      301.9135    75      312.0000      Cuts: 10      271    3.23%
+*     0+    0                          302.0000      301.9135             0.03%
+      0     0        cutoff            302.0000      301.9135      271    0.03%
+Elapsed time = 0.06 sec. (46.24 ticks, tree = 0.01 MB, solutions = 5)
 
-Zero-half cuts applied:  6
+Zero-half cuts applied:  5
 Lift and project cuts applied:  2
-Gomory fractional cuts applied:  1
+Gomory fractional cuts applied:  2
 
 Root node processing (before b&c):
-  Real time             =    0.08 sec. (44.71 ticks)
+  Real time             =    0.06 sec. (46.40 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.08 sec. (44.71 ticks)
+Total (root+branch&cut) =    0.06 sec. (46.40 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.0792888
+Tempo (s)     : 0.0596402
 Valor obj.    : 302
 Melhor bound  : 302
 MIP gap (%)   : 0

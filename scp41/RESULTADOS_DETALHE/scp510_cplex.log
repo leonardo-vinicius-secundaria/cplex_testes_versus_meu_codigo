@@ -8,7 +8,6 @@ Conjuntos (n) : 2000
 
 Iniciando otimizacao...
 
-Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
 CPXPARAM_Simplex_Display                         0
 CPXPARAM_Threads                                 1
 CPXPARAM_TimeLimit                               60
@@ -21,35 +20,34 @@ Reduced MIP has 1822 binaries, 0 generals, 0 SOSs, and 0 indicators.
 Presolve time = 0.01 sec. (4.84 ticks)
 Probing time = 0.00 sec. (0.20 ticks)
 Tried aggregator 1 time.
-Detecting symmetries...
 Reduced MIP has 200 rows, 1822 columns, and 7730 nonzeros.
 Reduced MIP has 1822 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.01 sec. (3.68 ticks)
+Presolve time = 0.00 sec. (3.72 ticks)
 Probing time = 0.00 sec. (0.20 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: none, using 1 thread.
-Root relaxation solution time = 0.00 sec. (1.61 ticks)
+Root relaxation solution time = 0.00 sec. (1.62 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
 
 *     0+    0                        92499.0000        0.0000           100.00%
 *     0     0      integral     0      265.0000      265.0000      126    0.00%
-Elapsed time = 0.03 sec. (13.46 ticks, tree = 0.00 MB, solutions = 2)
+Elapsed time = 0.02 sec. (13.54 ticks, tree = 0.00 MB, solutions = 2)
 
 Root node processing (before b&c):
-  Real time             =    0.03 sec. (13.55 ticks)
+  Real time             =    0.02 sec. (13.62 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.03 sec. (13.55 ticks)
+Total (root+branch&cut) =    0.02 sec. (13.62 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.0273149
+Tempo (s)     : 0.0195816
 Valor obj.    : 265
 Melhor bound  : 265
 MIP gap (%)   : 0

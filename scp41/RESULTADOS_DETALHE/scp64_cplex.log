@@ -8,7 +8,6 @@ Conjuntos (n) : 1000
 
 Iniciando otimizacao...
 
-Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
 CPXPARAM_Simplex_Display                         0
 CPXPARAM_Threads                                 1
 CPXPARAM_TimeLimit                               60
@@ -20,43 +19,71 @@ Reduced MIP has 1000 binaries, 0 generals, 0 SOSs, and 0 indicators.
 Presolve time = 0.00 sec. (3.29 ticks)
 Probing time = 0.00 sec. (0.16 ticks)
 Tried aggregator 1 time.
-Detecting symmetries...
 Reduced MIP has 200 rows, 1000 columns, and 9857 nonzeros.
 Reduced MIP has 1000 binaries, 0 generals, 0 SOSs, and 0 indicators.
-Presolve time = 0.00 sec. (3.75 ticks)
+Presolve time = 0.00 sec. (3.78 ticks)
 Probing time = 0.00 sec. (0.16 ticks)
 MIP emphasis: balance optimality and feasibility.
 MIP search method: dynamic search.
 Parallel mode: none, using 1 thread.
-Root relaxation solution time = 0.01 sec. (4.80 ticks)
+Root relaxation solution time = 0.00 sec. (4.21 ticks)
 
         Nodes                                         Cuts/
    Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
 
 *     0+    0                        50264.0000        0.0000           100.00%
-      0     0      129.0000    26    50264.0000      129.0000      181   99.74%
+      0     0      129.0000    40    50264.0000      129.0000      164   99.74%
+*     0+    0                          145.0000      129.0000            11.03%
 *     0+    0                          133.0000      129.0000             3.01%
-      0     0      129.5074    49      133.0000       Cuts: 3      207    2.63%
-*     0+    0                          131.0000      129.5074             1.14%
-      0     0        cutoff            131.0000                    213    0.00%
-Elapsed time = 0.04 sec. (26.09 ticks, tree = 0.01 MB, solutions = 3)
+      0     0      129.3462    43      133.0000      Cuts: 13      171    2.75%
+      0     0      129.6447    45      133.0000      Cuts: 17      180    2.52%
+*     0+    0                          131.0000      129.6447             1.03%
 
-Zero-half cuts applied:  1
-Lift and project cuts applied:  1
-Gomory fractional cuts applied:  1
+Repeating presolve.
+Tried aggregator 1 time.
+MIP Presolve eliminated 59 rows and 933 columns.
+MIP Presolve modified 2 coefficients.
+Reduced MIP has 141 rows, 67 columns, and 478 nonzeros.
+Reduced MIP has 67 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (1.02 ticks)
+Probing time = 0.00 sec. (0.06 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 141 rows, 67 columns, and 478 nonzeros.
+Reduced MIP has 67 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.26 ticks)
+Represolve time = 0.00 sec. (2.35 ticks)
+Probing time = 0.00 sec. (0.06 ticks)
+Clique table members: 44.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.00 sec. (0.91 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          131.0000      129.6447             1.03%
+      0     0      129.6447    45      131.0000      129.6447      288    1.03%
+      0     0        cutoff            131.0000                    297    0.00%
+Elapsed time = 0.06 sec. (43.48 ticks, tree = 0.01 MB, solutions = 5)
+
+Implied bound cuts applied:  1
+Zero-half cuts applied:  4
+Lift and project cuts applied:  3
+Gomory fractional cuts applied:  2
 
 Root node processing (before b&c):
-  Real time             =    0.04 sec. (26.14 ticks)
+  Real time             =    0.06 sec. (43.54 ticks)
 Sequential b&c:
   Real time             =    0.00 sec. (0.00 ticks)
                           ------------
-Total (root+branch&cut) =    0.04 sec. (26.14 ticks)
+Total (root+branch&cut) =    0.06 sec. (43.54 ticks)
 
 ============================================
  RESULTADOS
 ============================================
 Status CPLEX  : Optimal
-Tempo (s)     : 0.044291
+Tempo (s)     : 0.0571455
 Valor obj.    : 131
 Melhor bound  : 131
 MIP gap (%)   : 0
