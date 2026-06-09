@@ -1,0 +1,15 @@
+# Executáveis compilados
+scp41/dlx_scp
+scp41/cplex_scp
+*.exe
+*.out
+
+# Resultados e logs gerados automaticamente
+scp41/RESULTADOS/benchmark.csv
+scp41/RESULTADOS/benchmark_*.csv
+scp41/RESULTADOS_DETALHE/
+
+# Backups e temporários
+*.bak
+*.tmp
+*~

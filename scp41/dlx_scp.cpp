@@ -262,65 +262,81 @@ int effectiveCount(int c, int* onlyNode = nullptr, int* minCostOut = nullptr)
 // ============================================================
 int chooseColumn()
 {
-    int best = -1;
-    int bestCnt = INT_MAX;
-    double bestU = -1.0;
-    int bestMinCost = INT_MAX;
+    int    best      = -1;
+    double bestScore = -1e18;
 
-    // Primário: menor número real de candidatos disponíveis.
-    // Desempates: maior multiplicador lagrangiano e menor custo mínimo.
+    // Estratégia 0 (default): "coluna mais restrita" (menor numero de linhas
+    // disponiveis), com desempate por maior u_star. Combina o branching
+    // clássico do DLX (minimum remaining values) com a informacao dual.
+    // Poda muito mais que u_star puro nos casos com gap LP-IP grande.
+    if (seedStrategy % 8 == 0)
+    {
+        int bestCnt = INT_MAX;
+        double bestU = -1.0;
+        for (int c = rightN[header]; c != header; c = rightN[c])
+        {
+            int cnt = effectiveCount(c);
+            if (cnt == 0) return c;       // inviável -> backtrack imediato
+            if (cnt < bestCnt || (cnt == bestCnt && u_star[c] > bestU))
+            {
+                bestCnt = cnt;
+                bestU   = u_star[c];
+                best    = c;
+            }
+        }
+        return best;
+    }
+    // Estratégia 1: só u_star (LB-puro, caminho rápido O(colunas)).
+    if (seedStrategy % 8 == 1)
+    {
+        for (int c = rightN[header]; c != header; c = rightN[c])
+            if (u_star[c] > bestScore) { bestScore = u_star[c]; best = c; }
+        return best;
+    }
+    // Estratégia 6: apenas colSize.
+    if (seedStrategy % 8 == 6)
+    {
+        for (int c = rightN[header]; c != header; c = rightN[c])
+        {
+            double s = -(double)colSize[c];
+            if (s > bestScore) { bestScore = s; best = c; }
+        }
+        return best;
+    }
+    // Estratégia 5: u_star * colSize.
+    if (seedStrategy % 8 == 5)
+    {
+        for (int c = rightN[header]; c != header; c = rightN[c])
+        {
+            double s = u_star[c] * (double)colSize[c];
+            if (s > bestScore) { bestScore = s; best = c; }
+        }
+        return best;
+    }
+
+    // Demais estratégias usam minCost das linhas disponiveis.
     for (int c = rightN[header]; c != header; c = rightN[c])
     {
         int minCost = INT_MAX;
         int cnt = effectiveCount(c, nullptr, &minCost);
         if (cnt == 0) return c;
-
-        bool better =
-            (cnt < bestCnt) ||
-            (cnt == bestCnt && u_star[c] > bestU + 1e-12) ||
-            (cnt == bestCnt && fabs(u_star[c] - bestU) <= 1e-12 &&
-             minCost < bestMinCost);
-
-        if (better)
-        {
-            best = c;
-            bestCnt = cnt;
-            bestU = u_star[c];
-            bestMinCost = minCost;
-        }
         if (minCost == INT_MAX) minCost = 1;
 
         double score;
         switch (seedStrategy % 8) {
-            case 1:
-                // mistura híbrida (era seed=0 antiga)
-                score = u_star[c] * 1e6 - colSize[c] * 100.0 + (double)minCost / 1000.0;
-                break;
             case 2:
-                // variação leve
                 score = u_star[c] * 1e6 - colSize[c] * 1.0 + (double)minCost / 1000.0;
                 break;
             case 3:
-                // outra mistura
                 score = u_star[c] * 1e3 - colSize[c] * 100.0 + (double)minCost;
                 break;
             case 4:
-                // heurística antiga (UB-orientada): score baixo = melhor
                 score = -((double)minCost * 1000.0 + colSize[c]);
                 break;
-            case 5:
-                // u_star * colSize (mistura multiplicativa)
-                score = u_star[c] * (double)colSize[c];
-                break;
-            case 6:
-                // só colSize (DLX clássico)
-                score = -(double)colSize[c];
-                break;
             case 7:
-                // foco em coluna cara
                 score = u_star[c] * 1e6 + (double)minCost * 100.0 - (double)colSize[c];
                 break;
-            default: // 0 = MELHOR ESTRATÉGIA GERAL (só u_star, LB-puro)
+            default:
                 score = u_star[c];
                 break;
         }
@@ -965,7 +981,7 @@ int iteratedGreedy(const Instance& inst,
         int n = inst.n;
         int m = inst.m;
 
-        for (int rep = 0; rep < 50; rep++)
+        for (int rep = 0; rep < 20; rep++)
         {
             int K = 3 + (int)(uniform_int_distribution<int>(0, 7)(rng));
             if (K > (int)bestSolOut.size()) K = (int)bestSolOut.size();
@@ -1827,7 +1843,7 @@ int main(int argc, char* argv[])
 
     // ---- 4c. UB melhor: iterated greedy + 2-opt local search ----
     vector<int> bestSolPool;
-    int igUB = iteratedGreedy(inst, alive, u_opt, 50, bestSolPool);
+    int igUB = iteratedGreedy(inst, alive, u_opt, 20, bestSolPool);
     cout << "[ITER-GREEDY] UB pos iterated greedy = " << igUB
          << " (|sol|=" << bestSolPool.size() << ")\n";
 
