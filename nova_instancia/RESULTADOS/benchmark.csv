@@ -1,0 +1,2 @@
+instance,cplex_cost,cplex_sets,cplex_wall,cplex_status,dlx_cost,dlx_sets,dlx_wall,dlx_status
+scpa1,253,67,0.599779,Optimal,253,67,1577.5131,Optimal

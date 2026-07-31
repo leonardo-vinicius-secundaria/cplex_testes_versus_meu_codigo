@@ -1,0 +1,103 @@
+============================================
+ Set Cover Problem — CPLEX Solver
+ Instancia: instancias/scpa1.txt
+============================================
+
+Elementos (m) : 300
+Conjuntos (n) : 3000
+
+Iniciando otimizacao...
+
+CPXPARAM_Simplex_Display                         0
+CPXPARAM_Threads                                 1
+CPXPARAM_TimeLimit                               1800
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+Found incumbent of value 151762.000000 after 0.00 sec. (0.16 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 0 rows and 97 columns.
+Reduced MIP has 300 rows, 2903 columns, and 17933 nonzeros.
+Reduced MIP has 2903 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (10.14 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 300 rows, 2903 columns, and 17933 nonzeros.
+Reduced MIP has 2903 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.01 sec. (7.99 ticks)
+Probing time = 0.00 sec. (0.35 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.02 sec. (12.46 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                       146238.0000        0.0000           100.00%
+      0     0      246.8368   112   146238.0000      246.8368      282   99.83%
+*     0+    0                          300.0000      246.8368            17.72%
+*     0+    0                          268.0000      246.8368             7.90%
+      0     0      248.1636   119      268.0000      Cuts: 12      326    7.40%
+      0     0      248.4401   116      268.0000   ZeroHalf: 3      354    7.30%
+*     0+    0                          256.0000      248.4401             2.95%
+*     0+    0                          255.0000      248.4401             2.57%
+*     0+    0                          254.0000      248.4401             2.19%
+
+Repeating presolve.
+Tried aggregator 1 time.
+MIP Presolve eliminated 12 rows and 2650 columns.
+Reduced MIP has 288 rows, 253 columns, and 1646 nonzeros.
+Reduced MIP has 253 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (2.08 ticks)
+Probing time = 0.00 sec. (0.10 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 288 rows, 253 columns, and 1646 nonzeros.
+Reduced MIP has 253 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.74 ticks)
+Represolve time = 0.01 sec. (7.75 ticks)
+Probing time = 0.00 sec. (0.10 ticks)
+Clique table members: 10.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.00 sec. (7.29 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          254.0000      248.4401             2.19%
+      0     0      248.4401   116      254.0000      248.4401      700    2.19%
+      0     0      248.8461   117      254.0000       Cuts: 9      737    2.03%
+      0     0      249.0213   118      254.0000   LiftProj: 1      774    1.96%
+      0     0      249.1410   120      254.0000       Cuts: 7      802    1.91%
+      0     0      249.1732   119      254.0000       Cuts: 2      824    1.90%
+      0     0      249.1974   114      254.0000   ZeroHalf: 1      833    1.89%
+      0     0      249.2281   120      254.0000   ZeroHalf: 2      851    1.88%
+      0     0      249.2345   122      254.0000   ZeroHalf: 1      857    1.88%
+      0     0      249.2398   123      254.0000   ZeroHalf: 3      867    1.87%
+      0     2      249.2398   123      254.0000      249.2415      867    1.87%
+Elapsed time = 0.57 sec. (547.07 ticks, tree = 0.01 MB, solutions = 7)
+*    29     4      integral     0      253.0000      250.9706     1917    0.80%
+
+Zero-half cuts applied:  13
+Lift and project cuts applied:  4
+
+Root node processing (before b&c):
+  Real time             =    0.57 sec. (547.29 ticks)
+Sequential b&c:
+  Real time             =    0.03 sec. (32.40 ticks)
+                          ------------
+Total (root+branch&cut) =    0.60 sec. (579.69 ticks)
+
+============================================
+ RESULTADOS
+============================================
+Status CPLEX  : Optimal
+Tempo (s)     : 0.599779
+Valor obj.    : 253
+Melhor bound  : 253
+MIP gap (%)   : 0
+Conjuntos sel.: 67
+
+Conjuntos selecionados (1-based):
+1 2 3 4 5 6 8 9 11 12 14 16 17 18 19 20 21 24 28 31 32 33 34 41 43 44 47 48 51 52 54 55 63 64 66 67 68 75 79 86 87 88 90 91 92 93 95 98 106 109 113 117 124 133 144 165 173 189 190 192 215 222 246 248 308 332 375 
+
+Solucao valida: SIM

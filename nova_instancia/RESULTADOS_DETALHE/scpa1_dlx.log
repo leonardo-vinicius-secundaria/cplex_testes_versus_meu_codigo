@@ -1,0 +1,87 @@
+iniciando set cover (instancia: instancias/scpa1.txt, time-limit: 1800s, seed=0)
+[LEITURA] m=300 elementos | n=3000 conjuntos
+[LEITURA] Custos lidos. Faixa: 1..100
+[LEITURA] Cobertura lida. Total de 1s na matriz: 18091
+[PRESOLVE] Conjuntos dominados removidos: 97 (sobraram 2903)
+[GREEDY] UB inicial = 288  (|sol|=89)
+[LAGRANGIAN] iniciando subgradient...
+[LAGRANGIAN] LB = 246.7177 (ceil=247, UB=260)
+[LAGRANGIAN] UB melhorado durante subgradient: 260 (|sol|=72)
+[RCFIX] Conjuntos eliminados por reduced-cost: 2387 (vivos agora: 516 conjuntos)
+[PROJECT] sum u_i (projetado, LB direto) = 246.7 (perda vs L(u)=-0.0001096)
+[ASCENT] LB direto pos ascent = 246.7 (ganho vs projecao: 0.0003393)
+[ASCENT] LB Lagrangiano atualizado para 246.7 (ceil=247)
+[ITER-GREEDY] UB pos iterated greedy = 254 (|sol|=68)
+[UB-FINAL] 254 (|sol|=68)
+[RCFIX] Conjuntos eliminados por reduced-cost: 179 (vivos agora: 337 conjuntos)
+[RCFIX-2] Conjuntos eliminados apos UB final: 179
+[BUILD] DLX construida. Nos totais: 2488 (max=200000)
+
+Instancia carregada com sucesso!
+Elementos (DLX colunas) : 300
+Conjuntos (DLX linhas)  : 3000
+Limite de tempo         : 1800 s
+
+[PROGRESSO] nos=100000000 | podas=77838140 | bestCost=254 | wall=64.42s
+[PROGRESSO] nos=200000000 | podas=155299227 | bestCost=254 | wall=100.39s
+[PROGRESSO] nos=300000000 | podas=232985321 | bestCost=254 | wall=137.03s
+[PROGRESSO] nos=400000000 | podas=310392767 | bestCost=254 | wall=173.29s
+[PROGRESSO] nos=500000000 | podas=387525249 | bestCost=254 | wall=207.05s
+[PROGRESSO] nos=600000000 | podas=464311527 | bestCost=254 | wall=241.88s
+[PROGRESSO] nos=700000000 | podas=541433026 | bestCost=254 | wall=278.71s
+[PROGRESSO] nos=800000000 | podas=619041207 | bestCost=254 | wall=316.52s
+[PROGRESSO] nos=900000000 | podas=696382506 | bestCost=254 | wall=353.50s
+[PROGRESSO] nos=1000000000 | podas=773864171 | bestCost=254 | wall=389.10s
+[PROGRESSO] nos=1100000000 | podas=850783516 | bestCost=254 | wall=425.28s
+
+[INCUMBENTE] custo=253 (melhora=0) | wall=431.4063s | CPU=431.3443s | nos=1113531153
+  Conjuntos (67): 190 332 19 109 88 6 133 43 144 44 87 95 222 28 24 2 33 4 1 189 64 17 215 246 51 68 86 20 32 75 14 48 12 165 21 192 54 92 34 31 66 79 47 98 91 11 93 18 308 67 52 63 3 117 55 106 248 16 41 90 375 113 5 9 8 173 124 
+
+[PROGRESSO] nos=1200000000 | podas=928170573 | bestCost=253 | wall=463.30s
+[PROGRESSO] nos=1300000000 | podas=1005919808 | bestCost=253 | wall=500.24s
+[PROGRESSO] nos=1400000000 | podas=1083075651 | bestCost=253 | wall=535.59s
+[PROGRESSO] nos=1500000000 | podas=1160579498 | bestCost=253 | wall=574.26s
+[PROGRESSO] nos=1600000000 | podas=1237978888 | bestCost=253 | wall=616.49s
+[PROGRESSO] nos=1700000000 | podas=1315016667 | bestCost=253 | wall=655.66s
+[PROGRESSO] nos=1800000000 | podas=1392649125 | bestCost=253 | wall=693.12s
+[PROGRESSO] nos=1900000000 | podas=1470015980 | bestCost=253 | wall=732.81s
+[PROGRESSO] nos=2000000000 | podas=1547230393 | bestCost=253 | wall=770.08s
+[PROGRESSO] nos=2100000000 | podas=1624568948 | bestCost=253 | wall=808.03s
+[PROGRESSO] nos=2200000000 | podas=1701950949 | bestCost=253 | wall=847.24s
+[PROGRESSO] nos=2300000000 | podas=1778868815 | bestCost=253 | wall=883.50s
+[PROGRESSO] nos=2400000000 | podas=1856081578 | bestCost=253 | wall=921.04s
+[PROGRESSO] nos=2500000000 | podas=1933075748 | bestCost=253 | wall=958.85s
+[PROGRESSO] nos=2600000000 | podas=2009956836 | bestCost=253 | wall=996.35s
+[PROGRESSO] nos=2700000000 | podas=2087086340 | bestCost=253 | wall=1034.50s
+[PROGRESSO] nos=2800000000 | podas=2163976956 | bestCost=253 | wall=1072.86s
+[PROGRESSO] nos=2900000000 | podas=2240926431 | bestCost=253 | wall=1111.37s
+[PROGRESSO] nos=3000000000 | podas=2318150338 | bestCost=253 | wall=1148.67s
+[PROGRESSO] nos=3100000000 | podas=2395070028 | bestCost=253 | wall=1187.52s
+[PROGRESSO] nos=3200000000 | podas=2471955605 | bestCost=253 | wall=1226.97s
+[PROGRESSO] nos=3300000000 | podas=2549020746 | bestCost=253 | wall=1266.68s
+[PROGRESSO] nos=3400000000 | podas=2626682934 | bestCost=253 | wall=1305.96s
+[PROGRESSO] nos=3500000000 | podas=2704504683 | bestCost=253 | wall=1341.69s
+[PROGRESSO] nos=3600000000 | podas=2782212073 | bestCost=253 | wall=1377.88s
+[PROGRESSO] nos=3700000000 | podas=2859710156 | bestCost=253 | wall=1415.77s
+[PROGRESSO] nos=3800000000 | podas=2937309105 | bestCost=253 | wall=1454.20s
+[PROGRESSO] nos=3900000000 | podas=3014739019 | bestCost=253 | wall=1490.91s
+[PROGRESSO] nos=4000000000 | podas=3091945222 | bestCost=253 | wall=1528.42s
+[PROGRESSO] nos=4100000000 | podas=3169127248 | bestCost=253 | wall=1567.60s
+[OTIMO] Busca B&B completou sem time-limit; bestCost e otimo.
+
+=== RESULTADO FINAL ===
+Custo minimo : 253
+Num. conjuntos: 67
+Conjuntos escolhidos: 190 332 19 109 88 6 133 43 144 44 87 95 222 28 24 2 33 4 1 189 64 17 215 246 51 68 86 20 32 75 14 48 12 165 21 192 54 92 34 31 66 79 47 98 91 11 93 18 308 67 52 63 3 117 55 106 248 16 41 90 375 113 5 9 8 173 124 
+[OK] Solucao OTIMA provada (bestCost == LB Lagrangiano).
+
+Estatisticas de busca:
+  Nos explorados : 4124553277
+  Podas          : 3188082723
+
++-------------------------------------------------+
+|        RESUMO DE TEMPO  (CPLEX-style)           |
++-------------------------------------------------+
+| Tempo de parede (Elapsed time) :  1577.5131 s |
+| Tempo de CPU   (CPU time)      :  1577.3673 s |
++-------------------------------------------------+
