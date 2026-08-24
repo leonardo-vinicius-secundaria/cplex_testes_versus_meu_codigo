@@ -1,0 +1,16 @@
+data_inicio=2026-08-22T19:37:45-03:00
+hostname=LAPTOP-PIT445R0
+kernel=Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 GNU/Linux
+compilador=g++ (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+flags_comuns=-O3 -DNDEBUG -std=c++17
+cplex_threads=1
+time_limit_core_s=6000
+hard_grace_s=15
+repeticoes=1
+solvers=dlx cplex
+cpu_core=2
+metrica_principal=tempo total interno apos leitura
+metrica_processo=relogio externo do inicio ao fim do processo, incluindo leitura
+cpu_e_rss_processo=/usr/bin/time
+cplex_home=/home/leo/CPLEX_Studio129
+instancias=../scpa1/scpa1.txt 

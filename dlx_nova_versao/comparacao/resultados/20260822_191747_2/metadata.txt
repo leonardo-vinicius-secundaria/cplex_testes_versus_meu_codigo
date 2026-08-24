@@ -1,0 +1,15 @@
+data_inicio=2026-08-22T19:17:47-03:00
+hostname=LAPTOP-PIT445R0
+kernel=Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 GNU/Linux
+compilador=g++ (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+flags_comuns=-O3 -DNDEBUG -std=c++17
+cplex_threads=1
+time_limit_core_s=30
+hard_grace_s=15
+repeticoes=3
+solvers=dlx cplex
+cpu_core=nao_fixado
+metrica_principal=tempo total interno apos leitura
+metrica_processo=/usr/bin/time do inicio ao fim do processo, incluindo leitura
+cplex_home=/home/leo/CPLEX_Studio129
+instancias=/home/leo/novo_tcc_rian/cplex_testes_versus_meu_codigo/dlx_nova_versao/comparacao/../instancias/scp41.txt /home/leo/novo_tcc_rian/cplex_testes_versus_meu_codigo/dlx_nova_versao/comparacao/../instancias/scp42.txt /home/leo/novo_tcc_rian/cplex_testes_versus_meu_codigo/dlx_nova_versao/comparacao/../instancias/scp43.txt 

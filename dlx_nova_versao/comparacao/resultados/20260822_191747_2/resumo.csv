@@ -1,0 +1,4 @@
+instance,cost_agreement,cplex_status,dlx_status,cplex_cost,dlx_cost,cplex_sets,dlx_sets,cplex_runs,dlx_runs,cplex_prep_median_s,dlx_prep_median_s,cplex_core_median_s,dlx_core_median_s,cplex_total_after_read_median_s,dlx_total_after_read_median_s,dlx_speedup_total_x,cplex_process_median_s,dlx_process_median_s,dlx_speedup_process_x,cplex_max_rss_median_kb,dlx_max_rss_median_kb,cplex_nodes_median,dlx_nodes_median
+scp41,MATCH_OPTIMAL,Optimal,Optimal,429,429,66,66,3,3,0.001454696,0.008779767,0.011591345,0.000041419,0.013348006,0.008821062,1.513,0.010000000,0.010000000,1.000,19988.0,3948.0,0.0,67.0
+scp42,MATCH_OPTIMAL,Optimal,Optimal,512,512,60,60,3,3,0.002441406,0.005627414,0.014711929,0.000051284,0.017153335,0.005677908,3.021,0.020000000,0.000000000,,19820.0,3828.0,0.0,61.0
+scp43,MATCH_OPTIMAL,Optimal,Optimal,516,516,64,64,3,3,0.001667357,0.004993404,0.011299363,0.000061414,0.013588952,0.005054818,2.688,0.010000000,0.000000000,,20436.0,3828.0,0.0,65.0

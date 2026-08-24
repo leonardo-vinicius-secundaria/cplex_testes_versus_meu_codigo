@@ -5,6 +5,8 @@ scp41/cplex_scp
 *.out
 
 # Resultados e logs gerados automaticamente
+*.log
+*.time
 scp41/RESULTADOS/benchmark.csv
 scp41/RESULTADOS/benchmark_*.csv
 scp41/RESULTADOS_DETALHE/
