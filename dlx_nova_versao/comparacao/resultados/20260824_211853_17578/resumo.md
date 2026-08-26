@@ -1,0 +1,16 @@
+# Resumo DLX x CPLEX
+
+A metrica principal e o total interno apos a leitura. Speedup DLX = tempo CPLEX / tempo DLX; valores maiores que 1 favorecem o DLX.
+
+| Instancia | Custos | CPLEX custo | DLX custo | CPLEX total med. (s) | DLX total med. (s) | Speedup DLX | CPLEX processo med. (s) | DLX processo med. (s) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| scpa1 | MATCH_OPTIMAL | 253 | 253 | 0.946856035 | 483.257245875 | 0.002 | 0.954177141 | 483.264469147 |
+| scpa2 | MATCH_OPTIMAL | 252 | 252 | 0.552173929 | 69.805026821 | 0.008 | 0.562161922 | 69.811670780 |
+| scpa3 | MATCH_OPTIMAL | 232 | 232 | 0.703536055 | 38.886323742 | 0.018 | 0.711772919 | 38.892995119 |
+| scpa4 | MATCH_OPTIMAL | 234 | 234 | 0.133551786 | 0.416185807 | 0.321 | 0.140696049 | 0.422003984 |
+| scpa5 | MATCH_OPTIMAL | 236 | 236 | 0.071227976 | 0.288424732 | 0.247 | 0.078177929 | 0.294114828 |
+| scpb2 | MATCH_INCUMBENT | 76 | 76 | 0.713141088 | 900.181328672 | 0.001 | 0.724540949 | 900.189477205 |
+| scpb3 | MATCH_OPTIMAL | 80 | 80 | 0.561806097 | 142.327845086 | 0.004 | 0.571416140 | 142.338455915 |
+| scpb4 | MATCH_INCUMBENT | 79 | 79 | 1.210223833 | 900.274000195 | 0.001 | 1.222368956 | 900.287057161 |
+| scpb5 | MATCH_OPTIMAL | 72 | 72 | 0.894858740 | 19.195726900 | 0.047 | 0.903075933 | 19.203541994 |
+| scpb.1 | MATCH_OPTIMAL | 69 | 69 | 0.910146124 | 12.200455157 | 0.075 | 0.923192024 | 12.212157011 |

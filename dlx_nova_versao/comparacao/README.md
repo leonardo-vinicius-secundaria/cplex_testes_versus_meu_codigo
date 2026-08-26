@@ -17,6 +17,20 @@ Os argumentos sao, nessa ordem, limite de tempo do nucleo de solucao em segundos
 ./benchmark.sh 300 3 'scp5*'
 ```
 
+O mesmo executor serve para outras colecoes; nao e necessario criar um script
+por pasta. Selecione o diretorio com `INSTANCE_DIR`. Por exemplo, para executar
+DLX V2 e CPLEX sobre todas as instancias 300 x 3000, com limite de 15 minutos
+para cada solver em cada instancia e uma repeticao:
+
+```bash
+DLX_VARIANT=v2 INSTANCE_DIR=../instancias_300_3000 ./benchmark.sh 900 1
+```
+
+O ultimo argumento controla as repeticoes. Troque `1` por `3` se quiser obter
+a mediana de tres execucoes; nesse caso, o tempo total maximo tambem triplica.
+Sem `DLX_VARIANT`, o executor preserva o comportamento anterior e usa a V1.
+Os metadados registram a variante, o nome e o SHA-256 do binario executado.
+
 Cada execucao cria uma pasta nova em `resultados/`. Os arquivos principais sao:
 
 - `runs.csv`: uma linha por execucao, com tempos internos, tempo do processo, CPU, memoria, custo, status e caminho do log;

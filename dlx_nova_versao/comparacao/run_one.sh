@@ -19,9 +19,14 @@ BIN_DIR=${BIN_DIR:-"$SCRIPT_DIR/bin"}
 DETAIL_DIR=${DETAIL_DIR:-"$SCRIPT_DIR/resultados/avulso/logs"}
 RUNS_CSV=${RUNS_CSV:-"$SCRIPT_DIR/resultados/avulso/runs.csv"}
 HARD_GRACE_SECONDS=${HARD_GRACE_SECONDS:-15}
+DLX_BINARY=${DLX_BINARY:-dlx}
 
 if [[ $SOLVER != dlx && $SOLVER != cplex ]]; then
     echo "ERRO: solver deve ser 'dlx' ou 'cplex'." >&2
+    exit 2
+fi
+if [[ $SOLVER == dlx && $DLX_BINARY != dlx && $DLX_BINARY != dlx_v2 ]]; then
+    echo "ERRO: DLX_BINARY deve ser 'dlx' ou 'dlx_v2'." >&2
     exit 2
 fi
 if [[ ! -f $INSTANCE ]]; then
@@ -32,8 +37,14 @@ if [[ ! $TIME_LIMIT =~ ^[0-9]+([.][0-9]+)?$ || $TIME_LIMIT == 0 ]]; then
     echo "ERRO: limite de tempo deve ser positivo." >&2
     exit 2
 fi
-if [[ ! -x "$BIN_DIR/$SOLVER" ]]; then
-    echo "ERRO: binario nao encontrado: $BIN_DIR/$SOLVER" >&2
+EXECUTABLE=$SOLVER
+SOLVER_LABEL=$SOLVER
+if [[ $SOLVER == dlx ]]; then
+    EXECUTABLE=$DLX_BINARY
+    SOLVER_LABEL=$DLX_BINARY
+fi
+if [[ ! -x "$BIN_DIR/$EXECUTABLE" ]]; then
+    echo "ERRO: binario nao encontrado: $BIN_DIR/$EXECUTABLE" >&2
     exit 2
 fi
 if [[ ! -x /usr/bin/time ]]; then
@@ -47,7 +58,7 @@ if [[ ! -f $RUNS_CSV ]]; then
 fi
 
 INSTANCE_NAME=$(basename -- "$INSTANCE" .txt)
-RUN_ID=$(printf '%s_rep%02d_pos%s_%s' "$INSTANCE_NAME" "$REPETITION" "$POSITION" "$SOLVER")
+RUN_ID=$(printf '%s_rep%02d_pos%s_%s' "$INSTANCE_NAME" "$REPETITION" "$POSITION" "$SOLVER_LABEL")
 LOG_FILE="$DETAIL_DIR/$RUN_ID.log"
 TIME_FILE="$DETAIL_DIR/$RUN_ID.time"
 HARD_TIMEOUT=$(awk -v limit="$TIME_LIMIT" -v grace="$HARD_GRACE_SECONDS" \
@@ -73,7 +84,7 @@ PROCESS_START=${EPOCHREALTIME:-$(date +%s.%N)}
     -f 'wall_s=%e\nuser_s=%U\nsystem_s=%S\nmax_rss_kb=%M' \
     -o "$TIME_FILE" \
     -- "${RUN_PREFIX[@]}" timeout --signal=TERM --kill-after=2s "${HARD_TIMEOUT}s" \
-    "$BIN_DIR/$SOLVER" "$INSTANCE" "$TIME_LIMIT" \
+    "$BIN_DIR/$EXECUTABLE" "$INSTANCE" "$TIME_LIMIT" \
     > "$LOG_FILE" 2>&1
 EXIT_CODE=$?
 PROCESS_END=${EPOCHREALTIME:-$(date +%s.%N)}
@@ -130,6 +141,6 @@ csv_row "$RUNS_CSV" \
     "$PROCESS_WALL" "$PROCESS_USER" "$PROCESS_SYSTEM" "$MAX_RSS" \
     "$NODES" "$BEST_BOUND" "$GAP" "$VALID" "$LOG_FILE"
 
-printf '%-9s rep=%-2s pos=%s | %-5s | custo=%-8s total=%-11ss processo=%-8ss status=%s\n' \
-    "$INSTANCE_NAME" "$REPETITION" "$POSITION" "$SOLVER" \
+printf '%-9s rep=%-2s pos=%s | %-7s | custo=%-8s total=%-11ss processo=%-8ss status=%s\n' \
+    "$INSTANCE_NAME" "$REPETITION" "$POSITION" "$SOLVER_LABEL" \
     "${COST:--}" "${TOTAL_WALL:--}" "${PROCESS_WALL:--}" "$STATUS"
